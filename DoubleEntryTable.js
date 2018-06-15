@@ -54,7 +54,7 @@
   "Stable": 51
 }]
 
-let data = [
+let dataTest = [
   {
     "AppName": "App1",
     "Branch": "Finance",
@@ -147,7 +147,7 @@ let chartOptions = {
   spot_matrix_type : 'ring'
 }
 
-function SpotMatrix(dataset, chartOptions) {
+function SpotMatrix(data, chartOptions) {
   let spotRadius = chartOptions.spot_radius;
   let minColor = chartOptions.min_color;
   let maxColor = chartOptions.max_color;
@@ -155,6 +155,9 @@ function SpotMatrix(dataset, chartOptions) {
   let spotCellMargin = chartOptions.spot_cell_margin;
   let spotMatrixType = chartOptions.spot_matrix_type;
   let strokeColor = chartOptions.stroke_color;
+  let dimColumn = 'Branch';
+  let dimRows = 'CompanyBrand';
+  let dimElementInside = 'AppName'
 
   if (isNaN(spotRadius) || spotRadius < 0) {
     throw new Error("Spot Radius must be a Positive Number");
@@ -186,7 +189,9 @@ function SpotMatrix(dataset, chartOptions) {
 
   let div = d3.select('body').append('div')
     .attr('class', 'DoubleEntryTable');
-  let column_topics = d3.keys(dataset[0]);
+  let columnsName = data.map(el => el[dimColumn]).filter((v, i, a) => a.indexOf(v) === i)
+  let colNamesPlusEmpty = data.map(el => el[dimColumn]).filter((v, i, a) => a.indexOf(v) === i)
+  colNamesPlusEmpty.unshift('')
   let extentOfData = d3.extent(
     function(array, names) {
       let res = [];
@@ -197,7 +202,7 @@ function SpotMatrix(dataset, chartOptions) {
         });
       });
       return (res);
-    }(dataset, column_topics)
+    }(data, colNamesPlusEmpty)
   )
 
   function toRadians(degs) {
@@ -246,7 +251,7 @@ function SpotMatrix(dataset, chartOptions) {
   // return the text string for each item in the data array
 
   theadRow.selectAll("td")
-    .data(d3.keys(dataset[0]))
+    .data(colNamesPlusEmpty)
     .enter()
     .append("td")
     .attr('style', "padding:" + spotCellPadding + "px;" + "margin:" + spotCellMargin + "px")
@@ -254,30 +259,125 @@ function SpotMatrix(dataset, chartOptions) {
       return evalText(d);
     });
 
-  // table body rows
-  let tableBodyRows = tbody.selectAll("tr")
-    .data(dataset)
-    .enter()
-    .append("tr");
+  let rowsName = data.map(el => el[dimRows]).filter((v, i, a) => a.indexOf(v) === i)
 
+  // Position of elements in the table body matrix
+  let matrixElements = new Array(rowsName.length).fill()
+    .map(()=> {
+      return new Array(columnsName.length).fill()
+        .map(() => {
+          return []
+        })
+    });
+
+  data.forEach(el => {
+    let columnPos = columnsName.indexOf(el[dimColumn])
+    let rowPos = rowsName.indexOf(el[dimRows])
+    matrixElements[rowPos][columnPos].push({name: el[dimElementInside]})
+  })
+
+  // Table body matrix
+  let cellData = []
+  rowsName.forEach((nameX,  i) => {
+    cellData[i] = []
+    columnsName.forEach((nameY,j) => {
+      cellData[i][j] = {
+        nameX: nameX,
+        nameY: nameY,
+        insideElements: matrixElements[i][j]
+      }
+    })
+  })
+
+  // Array of each row name plus each cell data (rowName x columnName)
+  let dataRows = rowsName.map((colName, i) => {
+    return {
+      columnName: colName,
+      rowData: cellData[i]
+    }
+  })
+
+  console.log('datarows', dataRows)
+
+  // table body rows
+  // title rows (filter to get unique values of dimRows)
+  let tableBodyRows = tbody.selectAll("tr")
+    .data(dataRows)
+    .enter()
+    .append("tr")
+    .attr('class', 'Row');
 
   //table body row cells
-  tableBodyRows.selectAll("td")
-    .data(function(d) {
-      return d3.values(d);
+  let cells = tableBodyRows.selectAll("td")
+    .data(td => {
+      let row = td.rowData
+      row.unshift({nameRow: td.columnName})
+      return row
     })
     .enter()
     .append("td")
     .attr('style', "padding:" + spotCellPadding + "px;" + "margin:" + spotCellMargin + "px;")
-    .html(function(d) {
-      return evalText(d);
+    .attr('class', 'Cell')
+
+  cells.html(function(d) {
+      if (d.hasOwnProperty('nameRow')) {
+        return evalText(d.nameRow);
+      }
+      else {
+        let inside = ''
+        d.insideElements.forEach(el => inside += el.name + ' ')
+        return evalText(inside)
+      }
     })
-    .filter(function(d) {
+
+    /* .filter(function(d) {
       return !isNaN(d);
+    }) */
+
+  cells.selectAll('.Cell')
+    .data((filledCell, i) => {
+      if (filledCell.hasOwnProperty('nameRow')) {
+        return []
+      }
+      else {
+        return filledCell.insideElements
+      }
     })
-    .append(function(d, i, j) {
+    .enter()
+    .append('g')
+    .attr('class', 'Component')
+
+  cells.selectAll('.Component')
+    .append('circle')
+    .attr('cx', spotRadius)
+    .attr('cy', spotRadius)
+    .attr('r', 10)
+    .style('fill', '#66ccff')
+
+  // Create svg elements in cells for each insideElement
+  /* tableBodyRows.selectAll('.FilledCell')
+    .each(function (d) {
+      let filledCell = d3.select(this)
+      d.insideElements.forEach(elInside => {
+        filledCell.append('g')
+          .attr('class', el => {
+            console.log(el)
+            return 'InsideElement'
+          })
+      })
+    }) */
+
+
+
+  /* insideElementCells.append('circle')
+    .attr('cx', spotRadius)
+    .attr('cy', spotRadius)
+    .attr('r', 10)
+    .style('fill', '#66ccff') */
+
+    /*.append(function(d, i, j) {
       return renderSpots(d, i, j);
-    });
+    }); */
 
   function renderSpots(d, i, j) {
 
@@ -436,4 +536,4 @@ function SpotMatrix(dataset, chartOptions) {
   // return div;
 }
 
-SpotMatrix(dataset,chartOptions);
+SpotMatrix(dataTest,chartOptions);
