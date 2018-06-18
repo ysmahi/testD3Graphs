@@ -138,8 +138,10 @@ let dataTest = [
 ]
 
 let chartOptions = {
-  spot_radius : 15,
-  spot_cell_padding : 15,
+  spot_radius : 30,
+  svg_inside_width: 60,
+  svg_inside_height: 60,
+  spot_cell_padding : 10,
   spot_cell_margin : 5,
   min_color : '#efefef',
   max_color : '#01579b',
@@ -149,6 +151,8 @@ let chartOptions = {
 
 function SpotMatrix(data, chartOptions) {
   let spotRadius = chartOptions.spot_radius;
+  let svgInsideWidth = chartOptions.svg_inside_width;
+  let svgInsideHeight = chartOptions.svg_inside_height;
   let minColor = chartOptions.min_color;
   let maxColor = chartOptions.max_color;
   let spotCellPadding = chartOptions.spot_cell_padding;
@@ -323,16 +327,7 @@ function SpotMatrix(data, chartOptions) {
       if (d.hasOwnProperty('nameRow')) {
         return evalText(d.nameRow);
       }
-      else {
-        let inside = ''
-        d.insideElements.forEach(el => inside += el.name + ' ')
-        return evalText(inside)
-      }
     })
-
-    /* .filter(function(d) {
-      return !isNaN(d);
-    }) */
 
   cells.selectAll('.Cell')
     .data((filledCell, i) => {
@@ -344,36 +339,32 @@ function SpotMatrix(data, chartOptions) {
       }
     })
     .enter()
-    .append('g')
+    .append('svg')
     .attr('class', 'Component')
+    .attr('width', svgInsideWidth)
+    .attr('height', svgInsideHeight)
+    .attr('margin', '5px')
+    .attr('padding', '3px')
 
+  // Circles representing each inside component
   cells.selectAll('.Component')
     .append('circle')
     .attr('cx', spotRadius)
     .attr('cy', spotRadius)
-    .attr('r', 10)
+    .attr('r', 25)
     .style('fill', '#66ccff')
 
-  // Create svg elements in cells for each insideElement
-  /* tableBodyRows.selectAll('.FilledCell')
-    .each(function (d) {
-      let filledCell = d3.select(this)
-      d.insideElements.forEach(elInside => {
-        filledCell.append('g')
-          .attr('class', el => {
-            console.log(el)
-            return 'InsideElement'
-          })
-      })
-    }) */
-
-
-
-  /* insideElementCells.append('circle')
-    .attr('cx', spotRadius)
-    .attr('cy', spotRadius)
-    .attr('r', 10)
-    .style('fill', '#66ccff') */
+  // Append text to each svg
+  cells.selectAll('.Component')
+    .append('text')
+    .style('transform', 'translate( 50%, 50%)')
+    .style('fill', '#FFFFFF')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'central')
+    .text(svg => svg.name)
+    .text(svg => {
+      return svg.name;
+    })
 
     /*.append(function(d, i, j) {
       return renderSpots(d, i, j);
