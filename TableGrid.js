@@ -5,6 +5,16 @@ let dataTest = [
     "CompanyBrand": "Brand1"
   },
   {
+    "AppName": "App1",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand2"
+  },
+  {
+    "AppName": "App1",
+    "Branch": "Tech",
+    "CompanyBrand": "Brand2"
+  },
+  {
     "AppName": "App2",
     "Branch": "Finance",
     "CompanyBrand": "Brand1"
@@ -115,26 +125,65 @@ function createGridChart(data, chartOptions) {
     .filter((v, i, a) => !(a.indexOf(v) === i))
     .filter((v, i, a) => a.indexOf(v) === i)
 
-  /* let dataInsideMultiple = namesDataMultiple.map(name => {
-    let inRows = []
-    let inCols = []
-    data.filter(item => item[dimElementInside] === name)
+  // Separation of vertical and horizontal elements
+  let horizontalElementsData = []
+  let verticalElementsData = []
+  namesDataMultiple.forEach(nameInsideElement => {
+    let rowsData = []
+    let rowsName = []
+    data.filter(item => item[dimElementInside] === nameInsideElement)
       .forEach(el => {
-        inRows.push(el[dimRow])
-        inCols.push(el[dimColumn])
+        rowsName.push(el[dimRow])
+        rowsData.push(el)
       })
 
-    inRows = inRows.filter((v, i, a) => a.indexOf(v) === i)
-    inCols = inCols.filter((v, i, a) => a.indexOf(v) === i)
+    uniqueRowsName = rowsName.filter((v, i, a) => a.indexOf(v) === i)
 
-    return {
-      vertical: {
-        nameElementInside: name,
-        columnName: inRow,
-        inRows:
+    uniqueRowsName.forEach(rowName => {
+      let cols = []
+      rowsData.filter(data => data[dimRow] === rowName)
+        .forEach(el => {
+          cols.push(el[dimColumn])
+        })
+      let nameUniqueCols = cols.filter((v, i, a) => a.indexOf(v) === i)
+
+      if (nameUniqueCols.length > 1) {
+        verticalElementsData.push({
+          nameInsideElement: nameInsideElement,
+          columnsName: nameUniqueCols,
+          rowName: rowName
+        })
       }
-    }
-  }) */
+      else {
+        let rows = []
+        let nameCol = nameUniqueCols[0]
+        rows = rowsData.filter(el => el[dimColumn] === nameCol)
+          .map(el => el[dimRow])
+
+        if (rows.length > 1) {
+          horizontalElementsData.push({
+            nameInsideElement: nameInsideElement,
+            columnName: nameCol,
+            rowsName: rows
+          })
+        }
+          // else : those element's columns and rows are not next to each other
+        // They will therefore be considered as two distinct elements
+      }
+    })
+  })
+  
+  horizontalElementsData = horizontalElementsData.filter((v, i, fullTable) => {
+    let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
+    return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
+  })
+  verticalElementsData = verticalElementsData.filter((v, i, fullTable) => {
+    let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
+    return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
+  })
+
+  console.log('horiz', horizontalElementsData)
+  console.log('vert', verticalElementsData)
 
   // Create position data for grid
   let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, 150, 150)
