@@ -62,7 +62,25 @@ let dataTest = [
   },
   {
     "AppName": "App2",
-    "Branch": "HR",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },  {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },  {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App2",
+    "Branch": "Finance",
     "CompanyBrand": "Brand2"
   },
   {
@@ -141,8 +159,8 @@ let chartOptions = {
   spot_radius : 30,
   svg_inside_width: 60,
   svg_inside_height: 60,
-  spot_cell_padding : 10,
-  spot_cell_margin : 5,
+  spot_cell_padding : 45,
+  spot_cell_margin : 0,
   min_color : '#efefef',
   max_color : '#01579b',
   stroke_color : '#01579b',
@@ -343,8 +361,8 @@ function SpotMatrix(data, chartOptions) {
     .attr('class', 'Component')
     .attr('width', svgInsideWidth)
     .attr('height', svgInsideHeight)
-    .attr('margin', '5px')
-    .attr('padding', '3px')
+    .attr('margin', '0px')
+    .attr('padding', '0px')
 
   // Circles representing each inside component
   cells.selectAll('.Component')
