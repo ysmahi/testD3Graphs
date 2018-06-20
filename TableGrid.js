@@ -40,6 +40,16 @@ let dataTest = [
     "CompanyBrand": "Brand3"
   },
   {
+    "AppName": "App3",
+    "Branch": "Sales",
+    "CompanyBrand": "Brand3"
+  },
+  {
+    "AppName": "App3",
+    "Branch": "HR",
+    "CompanyBrand": "Brand3"
+  },
+  {
     "AppName": "App4",
     "Branch": "Sales",
     "CompanyBrand": "Brand4"
@@ -67,6 +77,11 @@ let dataTest = [
   {
     "AppName": "App8",
     "Branch": "Sales",
+    "CompanyBrand": "Brand2"
+  },
+  {
+    "AppName": "App8",
+    "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
@@ -413,7 +428,114 @@ function createGridChart(data, chartOptions) {
     })
   })
 
-  // Create elements inside
+  // Create horizontal elements
+  horizontalElementsData.forEach(horizEl => {
+    let vValue = 0
+    let hValue = 0
+    horizEl.columnsName.forEach(function (col, i, allColumns) {
+      if (i === 0) {
+        // Create left of element in the left column
+        let matrixSelectionLeftSvg = getCellMatrix(grid,
+          '#' + horizEl.rowName + horizEl.columnsName[i],
+          maxHorizontalElements,
+          maxElementInCell)
+        // get right upper part of the cell
+        for (var v = maxVerticalElements - 1; v > -1; v--) {
+          for (var h = maxHorizontalElements  - 1; h > -1; h--) {
+            if (matrixSelectionLeftSvg[v][h].attr('isEmpty') === 'true') {
+              if ((v < vValue && h === hValue) || h > hValue) {
+                hValue = h
+                vValue = v
+              }
+            }
+          }
+        }
+
+        // Create top of element
+        matrixSelectionLeftSvg[vValue][hValue].append('rect')
+          .attr('x', svg => svg.x + svg.width / 2)
+          .attr('y', svg => svg.y + svg.width / 4)
+          .attr('width', svg => svg.width / 2 + 3)
+          .attr('height', svg => svg.width)
+          .style('fill', "green")
+
+        matrixSelectionLeftSvg[vValue][hValue].append('circle')
+          .attr('cx', svg => svg.x + svg.width / 2)
+          .attr('cy', svg => svg.y + svg.height / 2)
+          .attr('r', svg => svg.width / 2)
+          .attr('fill', 'green')
+
+        matrixSelectionLeftSvg[vValue][hValue].attr('isEmpty', 'false')
+      }
+
+      else if (i>0 && i !== allColumns.length -1) {
+        // Create Middle parts of the element
+        let matrixSelectionMiddleSvg = getCellMatrix(grid,
+          '#' + horizEl.rowName + horizEl.columnsName[i],
+          maxHorizontalElements,
+          maxElementInCell)
+
+        for (let h=0; h<maxHorizontalElements; h++) {
+          // Create the body of the element on each row of the cell
+          matrixSelectionMiddleSvg[vValue][h].append('rect')
+            .attr('x', svg => svg.x)
+            .attr('y', svg => svg.y + svg.width / 4)
+            .attr('width', svg => svg.width + 3)
+            .attr('height', svg => svg.width)
+            .style('fill', "green")
+
+          matrixSelectionMiddleSvg[vValue][h].attr('isEmpty', 'false')
+        }
+
+        // Append name of horizontal element
+        let isEven = (maxHorizontalElements%2 === 0)?true:false
+        matrixSelectionMiddleSvg[vValue][Math.trunc(maxHorizontalElements/2)].append('text')
+          .attr('x', svg => {
+            return (isEven)?svg.x:(svg.x + svg.width/2)
+          })
+          .attr('y', svg => svg.y + svg.height / 2)
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
+          .text(horizEl.nameInsideElement)
+      }
+
+      else if (i === allColumns.length -1) {
+        // Create the right part of the element in the right column
+        let matrixSelectionRightSvg = getCellMatrix(grid,
+          '#' + horizEl.rowName + horizEl.columnsName[i],
+          maxHorizontalElements,
+          maxElementInCell)
+
+        // Create top of element
+        matrixSelectionRightSvg[vValue][0].append('rect')
+          .attr('x', svg => svg.x)
+          .attr('y', svg => svg.y + svg.width / 4)
+          .attr('width', svg => svg.width / 2)
+          .attr('height', svg => svg.width)
+          .style('fill', "green")
+
+        matrixSelectionRightSvg[vValue][0].append('circle')
+          .attr('cx', svg => svg.x + svg.width / 2)
+          .attr('cy', svg => svg.y + svg.height / 2)
+          .attr('r', svg => svg.width / 2)
+          .attr('fill', 'green')
+
+        matrixSelectionRightSvg[vValue][0].attr('isEmpty', 'false')
+
+        // Append name of element if it is a two rows element
+        if (allColumns.length === 2) {
+          matrixSelectionRightSvg[vValue][0].append('text')
+            .attr('x', svg => svg.x)
+            .attr('y', svg => svg.y + svg.height / 2)
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'central')
+            .text(horizEl.nameInsideElement)
+        }
+      }
+    })
+  })
+
+  // Create single elements
   // TODO : replace data by single Data when multiple data append implemented
   singleElementsData.forEach((element, i) => {
     let emptyEmplacements = []
