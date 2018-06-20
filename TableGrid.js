@@ -15,6 +15,11 @@ let dataTest = [
     "CompanyBrand": "Brand3"
   },
   {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand3"
+  },
+  {
     "AppName": "App1",
     "Branch": "Tech",
     "CompanyBrand": "Brand2"
@@ -40,13 +45,26 @@ let dataTest = [
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App3",
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand2"
+  },  {
+    "AppName": "App6",
+    "Branch": "Tech",
+    "CompanyBrand": "Brand3"
+  },
+  {
+    "AppName": "App6",
     "Branch": "Sales",
     "CompanyBrand": "Brand3"
   },
   {
     "AppName": "App3",
     "Branch": "HR",
+    "CompanyBrand": "Brand3"
+  },  {
+    "AppName": "App3",
+    "Branch": "Sales",
     "CompanyBrand": "Brand3"
   },
   {
@@ -156,14 +174,17 @@ function createGridChart(data, chartOptions) {
   let singleElementsData = data.filter(el => namesDataMultiple.indexOf(el[dimElementInside]) === -1)
   namesDataMultiple.forEach(nameInsideElement => {
     let rowsData = []
-    let rowsName = []
+    let rows = []
     data.filter(item => item[dimElementInside] === nameInsideElement)
       .forEach(el => {
-        rowsName.push(el[dimRow])
+        rows.push(el[dimRow])
         rowsData.push(el)
       })
 
-    uniqueRowsName = rowsName.filter((v, i, a) => a.indexOf(v) === i)
+    uniqueRowsName = rows.filter((v, i, a) => a.indexOf(v) === i)
+      .sort((a, b) => {
+        return rowsName.indexOf(a) - rowsName.indexOf(b)
+      })
 
     uniqueRowsName.forEach(rowName => {
       let cols = []
@@ -172,6 +193,9 @@ function createGridChart(data, chartOptions) {
           cols.push(el[dimColumn])
         })
       let nameUniqueCols = cols.filter((v, i, a) => a.indexOf(v) === i)
+        .sort((a, b) => {
+          return columnsName.indexOf(a) - columnsName.indexOf(b)
+        })
 
       if (nameUniqueCols.length > 1) {
         horizontalElementsData.push({
@@ -181,16 +205,19 @@ function createGridChart(data, chartOptions) {
         })
       }
       else {
-        let rows = []
+        let r = []
         let nameCol = nameUniqueCols[0]
-        rows = rowsData.filter(el => el[dimColumn] === nameCol)
+        r = rowsData.filter(el => el[dimColumn] === nameCol)
           .map(el => el[dimRow])
+          .sort((a, b) => {
+            return rowsName.indexOf(a) - rowsName.indexOf(b)
+          })
 
-        if (rows.length > 1) {
+        if (r.length > 1) {
           verticalElementsData.push({
             nameInsideElement: nameInsideElement,
             columnName: nameCol,
-            rowsName: rows
+            rowsName: r
           })
         }
         else {
@@ -199,7 +226,7 @@ function createGridChart(data, chartOptions) {
           let dataElement = {}
           dataElement[dimElementInside] = nameInsideElement
           dataElement[dimColumn] = nameCol
-          dataElement[dimRow] = rows[0]
+          dataElement[dimRow] = r[0]
           singleElementsData.push(dataElement)
         }
       }
@@ -288,9 +315,34 @@ function createGridChart(data, chartOptions) {
     })
 
   /* Create superimposed svg elements */
-  let maxElementInCell = 6
-  let maxHorizontalElements = 3
-  let maxVerticalElements = Math.ceil(maxElementInCell/maxHorizontalElements)
+  // Calculation of max horizontal elements in the same cell
+  let matrixVertEl = new Array(rowsName.length).fill().map(() => {
+    return new Array(columnsName.length)
+      .fill()
+      .map(() => [0])
+  })
+
+  verticalElementsData.forEach(el => {
+    el.rowsName.forEach(rowName => {
+      matrixVertEl[rowsName.indexOf(rowName)][columnsName.indexOf(el.columnName)] = parseInt(matrixVertEl[rowsName.indexOf(rowName)][columnsName.indexOf(el.columnName)]) + 1
+    })
+  })
+
+  let matrixHorizEl = new Array(rowsName.length).fill().map(() => {
+    return new Array(columnsName.length)
+      .fill()
+      .map(() => [0])
+  })
+
+  horizontalElementsData.forEach(el => {
+    el.columnsName.forEach(colName => {
+      matrixHorizEl[rowsName.indexOf(el.rowName)][columnsName.indexOf(colName)] = parseInt(matrixHorizEl[rowsName.indexOf(el.rowName)][columnsName.indexOf(colName)]) + 1
+    })
+  })
+
+  let maxVerticalElements = Math.max(...matrixHorizEl.map(el => Math.max(...el))) + 1
+  let maxHorizontalElements = Math.max(...matrixVertEl.map(el => Math.max(...el))) + 1
+  let maxElementInCell = maxHorizontalElements * maxVerticalElements
 
   // Create a g for each cell (inCell is in front of cell, same size)
   inCell = cell.append('g')
@@ -451,19 +503,13 @@ function createGridChart(data, chartOptions) {
           }
         }
 
-        // Create top of element
+        // Create left of element
         matrixSelectionLeftSvg[vValue][hValue].append('rect')
-          .attr('x', svg => svg.x + svg.width / 2)
-          .attr('y', svg => svg.y + svg.width / 4)
-          .attr('width', svg => svg.width / 2 + 3)
-          .attr('height', svg => svg.width)
+          .attr('x', svg => svg.x)
+          .attr('y', svg => svg.y)
+          .attr('width', svg => svg.width + 3)
+          .attr('height', svg => svg.height)
           .style('fill', "green")
-
-        matrixSelectionLeftSvg[vValue][hValue].append('circle')
-          .attr('cx', svg => svg.x + svg.width / 2)
-          .attr('cy', svg => svg.y + svg.height / 2)
-          .attr('r', svg => svg.width / 2)
-          .attr('fill', 'green')
 
         matrixSelectionLeftSvg[vValue][hValue].attr('isEmpty', 'false')
       }
@@ -479,9 +525,9 @@ function createGridChart(data, chartOptions) {
           // Create the body of the element on each row of the cell
           matrixSelectionMiddleSvg[vValue][h].append('rect')
             .attr('x', svg => svg.x)
-            .attr('y', svg => svg.y + svg.width / 4)
+            .attr('y', svg => svg.y)
             .attr('width', svg => svg.width + 3)
-            .attr('height', svg => svg.width)
+            .attr('height', svg => svg.height)
             .style('fill', "green")
 
           matrixSelectionMiddleSvg[vValue][h].attr('isEmpty', 'false')
@@ -509,16 +555,10 @@ function createGridChart(data, chartOptions) {
         // Create top of element
         matrixSelectionRightSvg[vValue][0].append('rect')
           .attr('x', svg => svg.x)
-          .attr('y', svg => svg.y + svg.width / 4)
-          .attr('width', svg => svg.width / 2)
-          .attr('height', svg => svg.width)
+          .attr('y', svg => svg.y)
+          .attr('width', svg => svg.width)
+          .attr('height', svg => svg.height)
           .style('fill', "green")
-
-        matrixSelectionRightSvg[vValue][0].append('circle')
-          .attr('cx', svg => svg.x + svg.width / 2)
-          .attr('cy', svg => svg.y + svg.height / 2)
-          .attr('r', svg => svg.width / 2)
-          .attr('fill', 'green')
 
         matrixSelectionRightSvg[vValue][0].attr('isEmpty', 'false')
 
@@ -536,8 +576,9 @@ function createGridChart(data, chartOptions) {
   })
 
   // Create single elements
-  // TODO : replace data by single Data when multiple data append implemented
   singleElementsData.forEach((element, i) => {
+    // TODO : here center single elements 1) collect all empty cells and indexes (i, j) of position of svg in cell
+    // TODO : 2) calculate distance with centerpoint and minimize 
     let emptyEmplacements = []
     let selectionSvg = grid.select('#' + element[dimRow] + element[dimColumn]).selectAll('svg')
       .each(function (svg) {
@@ -550,7 +591,7 @@ function createGridChart(data, chartOptions) {
     emptyEmplacements[0].append('circle')
       .attr('cx', svg => svg.x + svg.width/2)
       .attr('cy', svg => svg.y + svg.height/2)
-      .attr('r', 25)
+      .attr('r', svg => Math.min(svg.height/2, svg.width/2))
       .attr('fill', '#66ccff')
 
     emptyEmplacements[0].append('text')
