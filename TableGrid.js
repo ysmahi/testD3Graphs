@@ -11,6 +11,11 @@ let dataTest = [
   },
   {
     "AppName": "App1",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand3"
+  },
+  {
+    "AppName": "App1",
     "Branch": "Tech",
     "CompanyBrand": "Brand2"
   },
@@ -38,6 +43,11 @@ let dataTest = [
     "AppName": "App4",
     "Branch": "Sales",
     "CompanyBrand": "Brand4"
+  },
+  {
+    "AppName": "App4",
+    "Branch": "Sales",
+    "CompanyBrand": "Brand5"
   },
   {
     "AppName": "App5",
@@ -128,6 +138,7 @@ function createGridChart(data, chartOptions) {
   // Separation of vertical and horizontal elements
   let horizontalElementsData = []
   let verticalElementsData = []
+  let singleElementsData = data.filter(el => namesDataMultiple.indexOf(el[dimElementInside]) === -1)
   namesDataMultiple.forEach(nameInsideElement => {
     let rowsData = []
     let rowsName = []
@@ -148,7 +159,7 @@ function createGridChart(data, chartOptions) {
       let nameUniqueCols = cols.filter((v, i, a) => a.indexOf(v) === i)
 
       if (nameUniqueCols.length > 1) {
-        verticalElementsData.push({
+        horizontalElementsData.push({
           nameInsideElement: nameInsideElement,
           columnsName: nameUniqueCols,
           rowName: rowName
@@ -161,22 +172,31 @@ function createGridChart(data, chartOptions) {
           .map(el => el[dimRow])
 
         if (rows.length > 1) {
-          horizontalElementsData.push({
+          verticalElementsData.push({
             nameInsideElement: nameInsideElement,
             columnName: nameCol,
             rowsName: rows
           })
         }
-          // else : those element's columns and rows are not next to each other
-        // They will therefore be considered as two distinct elements
+        else {
+          // those element's columns and rows are not next to each other
+          // They will therefore be considered as two distinct elements
+          let dataElement = {}
+          dataElement[dimElementInside] = nameInsideElement
+          dataElement[dimColumn] = nameCol
+          dataElement[dimRow] = rows[0]
+          singleElementsData.push(dataElement)
+        }
       }
     })
   })
-  
+
+  // Data multiple horizontal elements
   horizontalElementsData = horizontalElementsData.filter((v, i, fullTable) => {
     let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
     return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
   })
+  // Data multiple vertical elements
   verticalElementsData = verticalElementsData.filter((v, i, fullTable) => {
     let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
     return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
@@ -184,6 +204,7 @@ function createGridChart(data, chartOptions) {
 
   console.log('horiz', horizontalElementsData)
   console.log('vert', verticalElementsData)
+  console.log('single', singleElementsData)
 
   // Create position data for grid
   let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, 150, 150)
@@ -285,10 +306,116 @@ function createGridChart(data, chartOptions) {
     .attr('isEmpty', 'true')
 
   // Create element inside for each item of dataset that is on more than a dimension
+  verticalElementsData.forEach(vertEl => {
 
+    let vValue = 0
+    let hValue = 0
+    vertEl.rowsName.forEach(function (row, i, allRows) {
+      if (i === 0) {
+        // Create top of element in the upper row
+        let matrixSelectionUpperSvg = getCellMatrix(grid,
+          '#' + vertEl.rowsName[i] + vertEl.columnName,
+          maxHorizontalElements,
+          maxElementInCell)
+        // get left lower part of the cell
+        for (var v = 0; v < maxVerticalElements; v++) {
+          for (var h = 0; h < maxHorizontalElements; h++) {
+            if (matrixSelectionUpperSvg[v][h].attr('isEmpty') === 'true') {
+              if ((h < hValue && v === vValue) || v > vValue) {
+                hValue = h
+                vValue = v
+              }
+            }
+          }
+        }
+
+        // Create top of element
+        matrixSelectionUpperSvg[vValue][hValue].append('rect')
+          .attr('x', svg => svg.x)
+          .attr('y', svg => svg.y + svg.height / 2)
+          .attr('width', svg => svg.width)
+          .attr('height', svg => svg.height / 2 + 3)
+          .style('fill', "red")
+
+        matrixSelectionUpperSvg[vValue][hValue].append('circle')
+          .attr('cx', svg => svg.x + svg.width / 2)
+          .attr('cy', svg => svg.y + svg.height / 2)
+          .attr('r', svg => svg.width / 2)
+          .attr('fill', 'red')
+
+        matrixSelectionUpperSvg[vValue][hValue].attr('isEmpty', 'false')
+      }
+
+      else if (i>0 && i !== allRows.length -1) {
+        // Create Middle parts of the element
+        let matrixSelectionMiddleSvg = getCellMatrix(grid,
+          '#' + vertEl.rowsName[i] + vertEl.columnName,
+          maxHorizontalElements,
+          maxElementInCell)
+
+        for (let v=0; v<maxVerticalElements; v++) {
+          // Create the body of the element on each row of the cell
+          matrixSelectionMiddleSvg[v][hValue].append('rect')
+            .attr('x', svg => svg.x)
+            .attr('y', svg => svg.y)
+            .attr('width', svg => svg.width)
+            .attr('height', svg => svg.height + 3)
+            .style('fill', "red")
+
+          matrixSelectionMiddleSvg[v][hValue].attr('isEmpty', 'false')
+        }
+
+        // Append name of vertical element
+        let isEven = (maxVerticalElements%2 === 0)?true:false
+        matrixSelectionMiddleSvg[Math.trunc(maxVerticalElements/2)][hValue].append('text')
+          .attr('x', svg => svg.x + svg.width/2)
+          .attr('y', svg => {
+            return isEven?svg.y:(svg.y + svg.height/2)
+          })
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
+          .text(vertEl.nameInsideElement)
+      }
+
+      else if (i === allRows.length -1) {
+        // Create the lower part of the element in the lower row
+        let matrixSelectionLowerSvg = getCellMatrix(grid,
+          '#' + vertEl.rowsName[i] + vertEl.columnName,
+          maxHorizontalElements,
+          maxElementInCell)
+
+        // Create top of element
+        matrixSelectionLowerSvg[0][hValue].append('rect')
+          .attr('x', svg => svg.x)
+          .attr('y', svg => svg.y)
+          .attr('width', svg => svg.width)
+          .attr('height', svg => svg.height / 2)
+          .style('fill', "red")
+
+        matrixSelectionLowerSvg[0][hValue].append('circle')
+          .attr('cx', svg => svg.x + svg.width / 2)
+          .attr('cy', svg => svg.y + svg.height / 2)
+          .attr('r', svg => svg.width / 2)
+          .attr('fill', 'red')
+
+        matrixSelectionLowerSvg[0][hValue].attr('isEmpty', 'false')
+
+        // Append name of element if it is a two rows element
+        if (allRows.length === 2) {
+          matrixSelectionLowerSvg[0][hValue].append('text')
+            .attr('x', svg => svg.x + svg.width / 2)
+            .attr('y', svg => svg.y)
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'central')
+            .text(vertEl.nameInsideElement)
+        }
+      }
+    })
+  })
 
   // Create elements inside
-  data.forEach((element, i) => {
+  // TODO : replace data by single Data when multiple data append implemented
+  singleElementsData.forEach((element, i) => {
     let emptyEmplacements = []
     let selectionSvg = grid.select('#' + element[dimRow] + element[dimColumn]).selectAll('svg')
       .each(function (svg) {
@@ -313,6 +440,8 @@ function createGridChart(data, chartOptions) {
 
     emptyEmplacements[0].attr('isEmpty', 'false')
   })
+
+  console.log('sel', getCellMatrix(grid, '#Brand1Finance', maxHorizontalElements, maxElementInCell))
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -344,6 +473,17 @@ function createGridChart(data, chartOptions) {
       ypos += height;
     }
     return data;
+  }
+
+  function getCellMatrix (selection, id, horizElements, totalElements) {
+    let matrix = new Array(Math.trunc(totalElements/horizElements)).fill().map(el => [])
+    selection.select(id).selectAll('svg')
+      .each(function (svg, i) {
+        let selSvg = d3.select(this)
+        matrix[Math.trunc(i/horizElements)][i%horizElements] = selSvg
+      })
+
+    return matrix
   }
 }
 
