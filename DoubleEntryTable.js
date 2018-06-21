@@ -254,7 +254,7 @@ function SpotMatrix(data, chartOptions) {
 
   // append a table to the div
   let table = div.append("table")
-    .attr("class", "table_spot-matrix")
+    .attr("class", "DoubleEntryTable")
     .classed("display", true);
 
   // append a header to the table
