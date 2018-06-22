@@ -104,6 +104,21 @@ let dataTest = [
     "CompanyBrand": "Brand4"
   },
   {
+    "AppName": "App10",
+    "Branch": "HR",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App10",
+    "Branch": "HR",
+    "CompanyBrand": "Brand2"
+  },
+  {
+    "AppName": "App10",
+    "Branch": "HR",
+    "CompanyBrand": "Brand6"
+  },
+  {
     "AppName": "App11",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
@@ -215,27 +230,106 @@ function createGridChart(data, chartOptions) {
         })
 
       if (nameUniqueCols.length > 1) {
-        horizontalElementsData.push({
-          nameInsideElement: nameInsideElement,
-          columnsName: nameUniqueCols,
-          rowName: rowName
-        })
+        let cs = [nameUniqueCols[0]]
+        for (let l=1; l<nameUniqueCols.length; l++) {
+          if (columnsName.indexOf(nameUniqueCols[l]) - columnsName.indexOf(nameUniqueCols[l - 1]) > 1) {
+            // columns not next to each other
+            if (cs.length > 1) {
+              // element is on multiple columns next to each other
+              horizontalElementsData.push({
+                nameInsideElement: nameInsideElement,
+                columnsName: cs,
+                rowName: rowName
+              })
+            }
+            else {
+              let dataElement = {}
+              dataElement[dimElementInside] = nameInsideElement
+              dataElement[dimColumn] = cs[0]
+              dataElement[dimRow] = rowName
+              singleElementsData.push(dataElement)
+            }
+            cs = [nameUniqueCols[l]]
+            if (l === nameUniqueCols.length - 1) {
+              let dataElement = {}
+              dataElement[dimElementInside] = nameInsideElement
+              dataElement[dimColumn] = cs[0]
+              dataElement[dimRow] = rowName
+              singleElementsData.push(dataElement)
+            }
+          }
+          else {
+            cs.push(nameUniqueCols[l])
+            if (l === nameUniqueCols.length - 1) {
+              horizontalElementsData.push({
+                nameInsideElement: nameInsideElement,
+                columnsName: cs,
+                rowName: rowName
+              })
+            }
+          }
+        }
       }
       else {
         let r = []
         let nameCol = nameUniqueCols[0]
         r = rowsData.filter(el => el[dimColumn] === nameCol)
           .map(el => el[dimRow])
+          .filter((v, i, a) => a.indexOf(v) === i)
           .sort((a, b) => {
             return rowsName.indexOf(a) - rowsName.indexOf(b)
           })
 
         if (r.length > 1) {
-          verticalElementsData.push({
-            nameInsideElement: nameInsideElement,
-            columnName: nameCol,
-            rowsName: r
-          })
+          let rs = [r[0]]
+          for (let l=1; l<r.length; l++) {
+            if (rowsName.indexOf(r[l]) - rowsName.indexOf(r[l - 1]) > 1) {
+              // rows not next to each other
+              if (rs.length > 1) {
+                // element is on multiple rows next to each other
+                verticalElementsData.push({
+                  nameInsideElement: nameInsideElement,
+                  columnName: nameCol,
+                  rowsName: rs
+                })
+              }
+              else {
+                let dataElement = {}
+                dataElement[dimElementInside] = nameInsideElement
+                dataElement[dimColumn] = nameCol
+                dataElement[dimRow] = rs[0]
+
+                // Check if element already in singleElementsData
+                let stringSingElData = singleElementsData.map(el => JSON.stringify(el))
+                if (stringSingElData.indexOf(JSON.stringify(dataElement)) === -1) {
+                  singleElementsData.push(dataElement)
+                }
+              }
+              rs = [r[l]]
+              if (l === r.length - 1) {
+                let dataElement = {}
+                dataElement[dimElementInside] = nameInsideElement
+                dataElement[dimColumn] = nameCol
+                dataElement[dimRow] = rs[0]
+
+                // Check if element already in singleElementsData
+                let stringSingElData = singleElementsData.map(el => JSON.stringify(el))
+                if (stringSingElData.indexOf(JSON.stringify(dataElement)) === -1) {
+                  singleElementsData.push(dataElement)
+                }
+              }
+            }
+            else {
+              rs.push(r[l])
+              if (l === r.length - 1) {
+                verticalElementsData.push({
+                  nameInsideElement: nameInsideElement,
+                  columnName: nameCol,
+                  rowsName: rs
+                })
+              }
+            }
+          }
         }
         else {
           // those element's columns and rows are not next to each other
@@ -597,8 +691,6 @@ function createGridChart(data, chartOptions) {
 
   // Create single elements
   singleElementsData.forEach((element, i) => {
-    // TODO : here center single elements 1) collect all empty cells and indexes (i, j) of position of svg in cell
-    // TODO : 2) calculate distance with centerpoint and minimize
     let matrixSelectionSvg = getCellMatrix(grid,
       '#' + element[dimRow] + element[dimColumn],
       maxCellWidth,
