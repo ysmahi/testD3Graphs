@@ -54,7 +54,7 @@
   "Stable": 51
 }]
 
-let data = [
+let dataTest = [
   {
     "AppName": "App1",
     "Branch": "Finance",
@@ -62,7 +62,25 @@ let data = [
   },
   {
     "AppName": "App2",
-    "Branch": "HR",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },  {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },  {
+    "AppName": "App6",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App2",
+    "Branch": "Finance",
     "CompanyBrand": "Brand2"
   },
   {
@@ -138,23 +156,30 @@ let data = [
 ]
 
 let chartOptions = {
-  spot_radius : 15,
-  spot_cell_padding : 15,
-  spot_cell_margin : 5,
+  spot_radius : 30,
+  svg_inside_width: 60,
+  svg_inside_height: 60,
+  spot_cell_padding : 45,
+  spot_cell_margin : 0,
   min_color : '#efefef',
   max_color : '#01579b',
   stroke_color : '#01579b',
   spot_matrix_type : 'ring'
 }
 
-function SpotMatrix(dataset, chartOptions) {
+function SpotMatrix(data, chartOptions) {
   let spotRadius = chartOptions.spot_radius;
+  let svgInsideWidth = chartOptions.svg_inside_width;
+  let svgInsideHeight = chartOptions.svg_inside_height;
   let minColor = chartOptions.min_color;
   let maxColor = chartOptions.max_color;
   let spotCellPadding = chartOptions.spot_cell_padding;
   let spotCellMargin = chartOptions.spot_cell_margin;
   let spotMatrixType = chartOptions.spot_matrix_type;
   let strokeColor = chartOptions.stroke_color;
+  let dimColumn = 'Branch';
+  let dimRows = 'CompanyBrand';
+  let dimElementInside = 'AppName'
 
   if (isNaN(spotRadius) || spotRadius < 0) {
     throw new Error("Spot Radius must be a Positive Number");
@@ -186,7 +211,9 @@ function SpotMatrix(dataset, chartOptions) {
 
   let div = d3.select('body').append('div')
     .attr('class', 'DoubleEntryTable');
-  let column_topics = d3.keys(dataset[0]);
+  let columnsName = data.map(el => el[dimColumn]).filter((v, i, a) => a.indexOf(v) === i)
+  let colNamesPlusEmpty = data.map(el => el[dimColumn]).filter((v, i, a) => a.indexOf(v) === i)
+  colNamesPlusEmpty.unshift('')
   let extentOfData = d3.extent(
     function(array, names) {
       let res = [];
@@ -197,7 +224,7 @@ function SpotMatrix(dataset, chartOptions) {
         });
       });
       return (res);
-    }(dataset, column_topics)
+    }(data, colNamesPlusEmpty)
   )
 
   function toRadians(degs) {
@@ -227,7 +254,7 @@ function SpotMatrix(dataset, chartOptions) {
 
   // append a table to the div
   let table = div.append("table")
-    .attr("class", "table_spot-matrix")
+    .attr("class", "DoubleEntryTable")
     .classed("display", true);
 
   // append a header to the table
@@ -246,7 +273,7 @@ function SpotMatrix(dataset, chartOptions) {
   // return the text string for each item in the data array
 
   theadRow.selectAll("td")
-    .data(d3.keys(dataset[0]))
+    .data(colNamesPlusEmpty)
     .enter()
     .append("td")
     .attr('style', "padding:" + spotCellPadding + "px;" + "margin:" + spotCellMargin + "px")
@@ -254,30 +281,112 @@ function SpotMatrix(dataset, chartOptions) {
       return evalText(d);
     });
 
-  // table body rows
-  let tableBodyRows = tbody.selectAll("tr")
-    .data(dataset)
-    .enter()
-    .append("tr");
+  let rowsName = data.map(el => el[dimRows]).filter((v, i, a) => a.indexOf(v) === i)
 
+  // Position of elements in the table body matrix
+  let matrixElements = new Array(rowsName.length).fill()
+    .map(()=> {
+      return new Array(columnsName.length).fill()
+        .map(() => {
+          return []
+        })
+    });
+
+  data.forEach(el => {
+    let columnPos = columnsName.indexOf(el[dimColumn])
+    let rowPos = rowsName.indexOf(el[dimRows])
+    matrixElements[rowPos][columnPos].push({name: el[dimElementInside]})
+  })
+
+  // Table body matrix
+  let cellData = []
+  rowsName.forEach((nameX,  i) => {
+    cellData[i] = []
+    columnsName.forEach((nameY,j) => {
+      cellData[i][j] = {
+        nameX: nameX,
+        nameY: nameY,
+        insideElements: matrixElements[i][j]
+      }
+    })
+  })
+
+  // Array of each row name plus each cell data (rowName x columnName)
+  let dataRows = rowsName.map((colName, i) => {
+    return {
+      columnName: colName,
+      rowData: cellData[i]
+    }
+  })
+
+  console.log('datarows', dataRows)
+
+  // table body rows
+  // title rows (filter to get unique values of dimRows)
+  let tableBodyRows = tbody.selectAll("tr")
+    .data(dataRows)
+    .enter()
+    .append("tr")
+    .attr('class', 'Row');
 
   //table body row cells
-  tableBodyRows.selectAll("td")
-    .data(function(d) {
-      return d3.values(d);
+  let cells = tableBodyRows.selectAll("td")
+    .data(td => {
+      let row = td.rowData
+      row.unshift({nameRow: td.columnName})
+      return row
     })
     .enter()
     .append("td")
     .attr('style', "padding:" + spotCellPadding + "px;" + "margin:" + spotCellMargin + "px;")
-    .html(function(d) {
-      return evalText(d);
+    .attr('class', 'Cell')
+
+  cells.html(function(d) {
+      if (d.hasOwnProperty('nameRow')) {
+        return evalText(d.nameRow);
+      }
     })
-    .filter(function(d) {
-      return !isNaN(d);
+
+  cells.selectAll('.Cell')
+    .data((filledCell, i) => {
+      if (filledCell.hasOwnProperty('nameRow')) {
+        return []
+      }
+      else {
+        return filledCell.insideElements
+      }
     })
-    .append(function(d, i, j) {
+    .enter()
+    .append('svg')
+    .attr('class', 'Component')
+    .attr('width', svgInsideWidth)
+    .attr('height', svgInsideHeight)
+    .attr('margin', '0px')
+    .attr('padding', '0px')
+
+  // Circles representing each inside component
+  cells.selectAll('.Component')
+    .append('circle')
+    .attr('cx', spotRadius)
+    .attr('cy', spotRadius)
+    .attr('r', 25)
+    .style('fill', '#66ccff')
+
+  // Append text to each svg
+  cells.selectAll('.Component')
+    .append('text')
+    .style('transform', 'translate( 50%, 50%)')
+    .style('fill', '#FFFFFF')
+    .attr('text-anchor', 'middle')
+    .attr('alignment-baseline', 'central')
+    .text(svg => svg.name)
+    .text(svg => {
+      return svg.name;
+    })
+
+    /*.append(function(d, i, j) {
       return renderSpots(d, i, j);
-    });
+    }); */
 
   function renderSpots(d, i, j) {
 
@@ -436,4 +545,4 @@ function SpotMatrix(dataset, chartOptions) {
   // return div;
 }
 
-SpotMatrix(dataset,chartOptions);
+SpotMatrix(dataTest,chartOptions);
