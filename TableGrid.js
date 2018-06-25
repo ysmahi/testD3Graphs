@@ -50,6 +50,16 @@ let dataTest = [
     "CompanyBrand": "Brand2"
   },
   {
+    "AppName": "App30",
+    "Branch": "Tech",
+    "CompanyBrand": "Brand3"
+  },
+  {
+    "AppName": "App30",
+    "Branch": "Tech",
+    "CompanyBrand": "Brand4"
+  },
+  {
     "AppName": "App3",
     "Branch": "HR",
     "CompanyBrand": "Brand3"
@@ -522,6 +532,7 @@ function createGridChart(data, chartOptions) {
     let vValue = 0
     let hValue = 0
     vertEl.rowsName.forEach(function (row, i, allRows) {
+      let iMiddle = Math.trunc(allRows.length/2)
       if (i === 0) {
         // Create top of element in the upper row
         let matrixSelectionUpperSvg = getCellMatrix(grid,
@@ -564,6 +575,8 @@ function createGridChart(data, chartOptions) {
           maxCellWidth,
           maxElementInCell)
 
+        let vMiddle = (allRows.length%2===0)?0:Math.trunc(maxCellHeight / 2)
+
         for (let v=0; v<maxCellHeight; v++) {
           // Create the body of the element on each row of the cell
           matrixSelectionMiddleSvg[v][hValue].append('rect')
@@ -574,18 +587,19 @@ function createGridChart(data, chartOptions) {
             .style('fill', "red")
 
           matrixSelectionMiddleSvg[v][hValue].attr('isEmpty', 'false')
-        }
 
-        // Append name of vertical element
-        let isEven = (maxCellHeight%2 === 0)?true:false
-        matrixSelectionMiddleSvg[Math.trunc(maxCellHeight/2)][hValue].append('text')
-          .attr('x', svg => svg.x + svg.width/2)
-          .attr('y', svg => {
-            return isEven?svg.y:(svg.y + svg.height/2)
-          })
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'central')
-          .text(vertEl.nameInsideElement)
+          if (v === vMiddle && i === iMiddle) {
+            // Append name of vertical element
+            matrixSelectionMiddleSvg[v][hValue].append('text')
+              .attr('x', svg => svg.x + svg.width / 2)
+              .attr('y', svg => {
+                return (allRows.length % 2 === 0) ? svg.y : (maxCellHeight % 2 === 0) ? svg.y : (svg.y + svg.height / 2)
+              })
+              .attr('text-anchor', 'middle')
+              .attr('alignment-baseline', 'central')
+              .text(vertEl.nameInsideElement)
+          }
+        }
       }
 
       else if (i === allRows.length -1) {
@@ -629,6 +643,7 @@ function createGridChart(data, chartOptions) {
     let vValue = 0
     let hValue = 0
     horizEl.columnsName.forEach(function (col, i, allColumns) {
+      let iMiddle = Math.trunc(allColumns.length/2)
       if (i === 0) {
         // Create left of element in the left column
         let matrixSelectionLeftSvg = getCellMatrix(grid,
@@ -665,7 +680,9 @@ function createGridChart(data, chartOptions) {
           maxCellWidth,
           maxElementInCell)
 
-        for (let h=0; h<maxCellWidth; h++) {
+        let hMiddle = (allColumns.length%2===0)?0:Math.trunc(maxCellWidth / 2)
+
+        for (let h = 0; h < maxCellWidth; h++) {
           // Create the body of the element on each row of the cell
           matrixSelectionMiddleSvg[vValue][h].append('rect')
             .attr('x', svg => svg.x)
@@ -673,36 +690,39 @@ function createGridChart(data, chartOptions) {
             .attr('width', svg => svg.width + 3)
             .attr('height', svg => svg.height)
             .style('fill', "green")
+            .style('opacity', d => (matrixSelectionMiddleSvg[vValue][h].attr('isEmpty') === 'false') ? 0.5 : 1)
 
           matrixSelectionMiddleSvg[vValue][h].attr('isEmpty', 'false')
-        }
 
-        // Append name of horizontal element
-        let isEven = (maxCellWidth%2 === 0)?true:false
-        matrixSelectionMiddleSvg[vValue][Math.trunc(maxCellWidth/2)].append('text')
-          .attr('x', svg => {
-            return (isEven)?svg.x:(svg.x + svg.width/2)
-          })
-          .attr('y', svg => svg.y + svg.height / 2)
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'central')
-          .text(horizEl.nameInsideElement)
+          // Append name of horizontal element
+          if (i === iMiddle && h === hMiddle) {
+            matrixSelectionMiddleSvg[vValue][h].append('text')
+              .attr('x', svg => {
+                return (allColumns.length % 2 === 0) ? svg.x : (maxCellWidth % 2 === 0) ? svg.x : (svg.x + svg.width / 2)
+              })
+              .attr('y', svg => svg.y + svg.height / 2)
+              .attr('text-anchor', 'middle')
+              .attr('alignment-baseline', 'central')
+              .text(horizEl.nameInsideElement)
+          }
+        }
       }
 
-      else if (i === allColumns.length -1) {
+      else if (i === allColumns.length - 1) {
         // Create the right part of the element in the right column
         let matrixSelectionRightSvg = getCellMatrix(grid,
           '#' + horizEl.rowName + horizEl.columnsName[i],
           maxCellWidth,
           maxElementInCell)
 
-        // Create top of element
+        // Create right of element
         matrixSelectionRightSvg[vValue][0].append('rect')
           .attr('x', svg => svg.x)
           .attr('y', svg => svg.y)
           .attr('width', svg => svg.width)
           .attr('height', svg => svg.height)
           .style('fill', "green")
+          .style('opacity', d => (matrixSelectionRightSvg[vValue][0].attr('isEmpty') === 'false')?0.5:1)
 
         matrixSelectionRightSvg[vValue][0].attr('isEmpty', 'false')
 
