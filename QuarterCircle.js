@@ -6,6 +6,12 @@ let dataTest = [
     "MarketPresence": 1
   },
   {
+    "CompanyName": "Company 12",
+    "Strategy": "0.4",
+    "CurrentOffering": "0.6",
+    "MarketPresence": 1
+  },
+  {
     "CompanyName": "Company 2",
     "Strategy": "0.8",
     "CurrentOffering": "0.7",
@@ -143,22 +149,44 @@ let dataTest = [
     // setup x
     let xValue = function(d) { return parseFloat(d[dimX]);}
     let xScale = d3.scaleLinear().domain([1,0]).range([radiusCircleElement + 2, graphWidth - 2 * radiusCircleElement - 2])
-    let xMap = function(d) {
-      return xScale(xValue(d));}
-      // xAxis = d3.svg.axis().scale(xScale).orient("top")
 
-// setup y
+    // setup y
     let yValue = function(d) { return parseFloat(d[dimY]);}
     let yScale = d3.scaleLinear().domain([1,0]).range([radiusCircleElement + 2, graphHeight - 2 * radiusCircleElement - 2])
-    let yMap = function(d) {
-      console.log('yValue', yValue(d))
-      console.log('yScaleValue', yScale(yValue(d)))
-      return yScale(yValue(d));}
-      // yAxis = d3.svg.axis().scale(yScale).orient("left")
+
+    // Map the basic node data to d3-friendly format.
+    let nodesElements = data.map((node) => {
+      return {
+        //radius: 0,
+        //color: '#ff7f0e',
+        x: xScale(parseFloat(node[dimX])),
+        y: yScale(parseFloat(node[dimY])),
+        nameElement: node[dimNameElement],
+        sizeElement: parseFloat(node[dimSizeElement])
+      };
+    });
+
+    let simulation = d3.forceSimulation(nodesElements)
+      .force("x", d3.forceX(function(d) { return d.x }).strength(0.03))
+      .force("y", d3.forceY(function(d) { return d.y }).strength(0.03))
+      .force("collide", d3.forceCollide().radius())
+      .force("manyBody", d3.forceManyBody().strength(-10))
+      .stop();
+
+    for (var i = 0; i < 150; ++i) simulation.tick()
+
+    arcsSpace.selectAll('circle')
+      .data(nodesElements)
+      .enter().append('circle')
+      .attr("class", "circleElement")
+      .attr("r", radiusCircleElement)
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y)
+      .style("fill", 'grey')
 
     /* Draw dataset elements to the graph on the arcs */
-    let elements = arcsSpace.selectAll(".element")
-      .data(data)
+    /* let elements = arcsSpace.selectAll(".element")
+      .data(nodesElements)
       .enter().append("g")
       .attr('class', 'element')
       .attr('transform', 'translate(20, 20)')
@@ -176,7 +204,7 @@ let dataTest = [
       .attr('y', yMap)
       .attr('dy', '.75em')
       .attr('text-anchor', 'left')
-      .attr('alignment-baseline', 'bottom')
+      .attr('alignment-baseline', 'bottom') */
 
     /* function that returns a color over a radient depending on the weight (between 0 and 1) */
     function pickHex(weight, color1, color2) {
