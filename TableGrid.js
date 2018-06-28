@@ -562,7 +562,7 @@ function createGridChart(data, chartOptions) {
         matrixSelectionUpperSvg[vValue][hValue].append('circle')
           .attr('cx', svg => svg.x + svg.width / 2)
           .attr('cy', svg => svg.y + svg.height / 2)
-          .attr('r', svg => svg.width / 2)
+          .attr('r', svg => Math.min(svg.width / 2, svg.height / 2))
           .attr('fill', 'red')
 
         matrixSelectionUpperSvg[vValue][hValue].attr('isEmpty', 'false')
@@ -620,7 +620,7 @@ function createGridChart(data, chartOptions) {
         matrixSelectionLowerSvg[0][hValue].append('circle')
           .attr('cx', svg => svg.x + svg.width / 2)
           .attr('cy', svg => svg.y + svg.height / 2)
-          .attr('r', svg => svg.width / 2)
+          .attr('r', svg => Math.min(svg.width / 2, svg.height / 2))
           .attr('fill', 'red')
 
         matrixSelectionLowerSvg[0][hValue].attr('isEmpty', 'false')
