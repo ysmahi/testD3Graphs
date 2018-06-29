@@ -1,12 +1,12 @@
 let dataTest = [
   {
-    "CompanyName": "Company 1",
+    "CompanyName": "Company Première",
     "Strategy": "0.4",
     "CurrentOffering": "0.6",
     "MarketPresence": 1
   },
   {
-    "CompanyName": "Company 12",
+    "CompanyName": "Company Uno",
     "Strategy": "0.4",
     "CurrentOffering": "0.6",
     "MarketPresence": 1
@@ -69,6 +69,36 @@ let dataTest = [
     "CompanyName": "Company 11",
     "Strategy": "0.9",
     "CurrentOffering": "0.9",
+    "MarketPresence": "0.9"
+  },
+  {
+    "CompanyName": "Company 13",
+    "Strategy": "1",
+    "CurrentOffering": "1",
+    "MarketPresence": "0.9"
+  },
+  {
+    "CompanyName": "Company 20",
+    "Strategy": "0",
+    "CurrentOffering": "0",
+    "MarketPresence": "0.9"
+  },
+  {
+    "CompanyName": "Company 14",
+    "Strategy": "0",
+    "CurrentOffering": "0.1",
+    "MarketPresence": "0.9"
+  },
+  {
+    "CompanyName": "Company OOO",
+    "Strategy": "0.25",
+    "CurrentOffering": "0.03",
+    "MarketPresence": "0.9"
+  },
+  {
+    "CompanyName": "Company III",
+    "Strategy": "0.21",
+    "CurrentOffering": "0.03",
     "MarketPresence": "0.9"
   }
 ]
@@ -147,42 +177,55 @@ let dataTest = [
 
     /* Create scatterplot */
     // setup x
-    let xValue = function(d) { return parseFloat(d[dimX]);}
     let xScale = d3.scaleLinear().domain([1,0]).range([radiusCircleElement + 2, graphWidth - 2 * radiusCircleElement - 2])
 
     // setup y
-    let yValue = function(d) { return parseFloat(d[dimY]);}
     let yScale = d3.scaleLinear().domain([1,0]).range([radiusCircleElement + 2, graphHeight - 2 * radiusCircleElement - 2])
 
     // Map the basic node data to d3-friendly format.
     let nodesElements = data.map((node) => {
+      let nodeX = xScale(parseFloat(node[dimX]))
+      let nodeY = yScale(parseFloat(node[dimY]))
+      let x0 = (nodeX + nodeY)*nodeX/(2 * Math.pow(Math.pow(nodeX, 2) + Math.pow(nodeY, 2), 0.5))
+      let y0 = (nodeX + nodeY)*nodeY/(2 * Math.pow(Math.pow(nodeX, 2) + Math.pow(nodeY, 2), 0.5))
       return {
         //radius: 0,
         //color: '#ff7f0e',
-        x: xScale(parseFloat(node[dimX])),
-        y: yScale(parseFloat(node[dimY])),
+        x: x0,
+        y: y0,
         nameElement: node[dimNameElement],
         sizeElement: parseFloat(node[dimSizeElement])
       };
     });
 
     let simulation = d3.forceSimulation(nodesElements)
-      .force("x", d3.forceX(function(d) { return d.x }).strength(0.03))
-      .force("y", d3.forceY(function(d) { return d.y }).strength(0.03))
-      .force("collide", d3.forceCollide().radius())
+      .force("x", d3.forceX(function(d) { return d.x }))
+      .force("y", d3.forceY(function(d) { return d.y }))
+      .force("collide", d3.forceCollide().radius(() => radiusCircleElement + 0.5))
       .force("manyBody", d3.forceManyBody().strength(-10))
       .stop();
 
-    for (var i = 0; i < 150; ++i) simulation.tick()
+    for (var i = 0; i < 200; ++i) simulation.tick()
 
-    arcsSpace.selectAll('circle')
+    let elementSpace = arcsSpace.selectAll('g')
       .data(nodesElements)
-      .enter().append('circle')
-      .attr("class", "circleElement")
+      .enter().append('g')
+      .attr("class", "elementSpace")
+      .attr('transform', 'translate(' + (20 + radiusCircleElement) + ',' + (20 + radiusCircleElement) + ')')
+
+      elementSpace.append('circle')
       .attr("r", radiusCircleElement)
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
       .style("fill", 'grey')
+
+    elementSpace.append('text')
+      .text(el => el.nameElement)
+      .attr('x', el => el.x + radiusCircleElement)
+      .attr('y', el => el.y)
+      .attr('dy', '.75em')
+      .attr('text-anchor', 'left')
+      .attr('alignment-baseline', 'bottom')
 
     /* Draw dataset elements to the graph on the arcs */
     /* let elements = arcsSpace.selectAll(".element")
