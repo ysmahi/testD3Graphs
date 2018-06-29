@@ -91,7 +91,7 @@ let dataTest = [
   },
   {
     "CompanyName": "Company OOO",
-    "Strategy": "0.25",
+    "Strategy": "0.23",
     "CurrentOffering": "0.03",
     "MarketPresence": "0.9"
   },
@@ -112,10 +112,11 @@ let dataTest = [
     let nameQuarterArcs = ['Leaders', 'Strong Performers', 'Contenders', 'Challengers']
 
     // Definition of graph lengths
-    let rawWidth = 600
-    let rawHeight = 600
-    let graphWidth = rawWidth - 50
-    let graphHeight = rawHeight - 50
+    let rawWidth = 800
+    let rawHeight = 800
+    let borderGraph = 50
+    let graphWidth = rawWidth - 3 * borderGraph
+    let graphHeight = rawHeight - 3 * borderGraph
     let widthFirstArc = graphWidth / 3
     let widthMiddleArcs = graphWidth / 4
     let radiusCircleElement = 10
@@ -126,15 +127,104 @@ let dataTest = [
       .attr('height', rawHeight)
 
 
-    /* Retrieve data from dataset */
+    /* Define x axis */
+    let xAxisSpace = svgGraph.selectAll('.xAxisSpace')
+      .data([{
+        x0:  borderGraph,
+        width: graphWidth,
+        y0: graphHeight + borderGraph,
+        height: 3 * borderGraph,
+        nameXAxis: dimX
+      }])
+      .enter()
+      .append('g')
+      .attr('class', 'xAxisSpace')
+
+    let defsX = xAxisSpace.append('defs')
+
+    defsX.append("marker")
+      .attr('id', 'arrow')
+      .attr("refX", 0)
+      .attr("refY", 3)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("markerUnits", 'strokeWidth')
+      .attr("orient", "auto")
+      .append('path')
+      .attr('d', "M0,0 L0,6 L9,3 z")
+      .attr('fill', 'black')
+      .attr('class', 'arrowHead')
+
+    xAxisSpace.append('line')
+      .attr("class", "arrow")
+      .attr("x2", borderGraph + 10)
+      .attr("y1", 1.5 * borderGraph + graphHeight)
+      .attr("x1", borderGraph + graphWidth)
+      .attr("y2", 1.5 * borderGraph + graphHeight)
+      .style("marker-end", "url(#arrow)")
+      .style('stroke', 'black')
+
+    // Append name of x axis
+    xAxisSpace.append('text')
+      .attr('x', d => d.x0 + d.width / 2)
+      .attr('y', d => d.y0 + d.height / 5)
+      .attr('dy', '.75em')
+      .text(dimX)
+      .attr('text-anchor', 'middle')
+      .attr('alignment-baseline', 'middle')
+
+    /* Define y axis */
+    let yAxisSpace = svgGraph.selectAll('.yAxisSpace')
+      .data([{
+        x0:  0,
+        width: borderGraph,
+        y0: borderGraph,
+        height: 2 * borderGraph + graphHeight,
+        nameYAxis: dimY
+      }])
+      .enter()
+      .append('g')
+      .attr('class', 'yAxisSpace')
+
+    let defsY = yAxisSpace.append('defs')
+
+    defsY.append("marker")
+      .attr('id', 'arrow')
+      .attr("refX", 0)
+      .attr("refY", 3)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("markerUnits", 'strokeWidth')
+      .attr("orient", "auto")
+      .append('path')
+      .attr('d', "M0,0 L0,6 L9,3 z")
+      .attr('fill', 'black')
+      .attr('class', 'arrowHead')
+
+    yAxisSpace.append('line')
+      .attr("class", "arrow")
+      .attr("x2", borderGraph / 2)
+      .attr("y1", borderGraph + graphHeight)
+      .attr("x1", borderGraph / 2)
+      .attr("y2", borderGraph + 10)
+      .style("marker-end", "url(#arrow)")
+      .style('stroke', 'black')
+
+    // Append name of y axis
+    yAxisSpace.append('text')
+      .attr('x', d => d.x0 + d.width / 2)
+      .attr('y', d => d.y0 + d.height / 2)
+      .attr('dy', '.75em')
+      .text(dimY)
+      .attr('text-anchor', 'middle')
+      .attr('alignment-baseline', 'middle')
 
     /* Create quarter of arcs */
     let arcsSpace = svgGraph.append('g')
-      .attr('transform', 'translate(29, 29)')
+      .attr('transform', 'translate(' + borderGraph + ',' + borderGraph + ')')
       .attr('class', 'arcsSpace')
 
     arcsSpace.append('rect')
-      .attr('transform', 'translate(20, 20)')
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', graphWidth)
@@ -157,7 +247,6 @@ let dataTest = [
         // Create and append arc
         arcsSpace.append("path")
           .attr('d', arc)
-          .attr('transform', 'translate(21, 21)')
           .style('fill', () => {
             return pickHex(i / arcsArray.length,
               {red: 204, green: 230, blue: 255},
@@ -165,53 +254,54 @@ let dataTest = [
           })
       }
 
-      arcsSpace.append('text')
+      svgGraph.append('text')
         .attr('x', () => currentRadius)
         .attr('y', 0)
         .attr('dy', '.75em')
         .text(nameArc)
-        .attr('transform', 'translate(25, 0)')
+        .attr('transform', 'translate(' + borderGraph +',' + (borderGraph - 20) + ')')
+        .attr('text-anchor', 'left')
+        .attr('alignment-baseline', 'middle')
 
       currentRadius += currentWidth
     })
 
     /* Create scatterplot */
-    // setup x
-    let xScale = d3.scaleLinear().domain([1,0]).range([radiusCircleElement + 2, graphWidth - 2 * radiusCircleElement - 2])
+    // setup x scale
+    let xScale = d3.scaleLinear().domain([1,0]).range([2 * radiusCircleElement + 2, graphWidth - 2 * radiusCircleElement - 2])
 
     // setup y
-    let yScale = d3.scaleLinear().domain([1,0]).range([radiusCircleElement + 2, graphHeight - 2 * radiusCircleElement - 2])
+    let yScale = d3.scaleLinear().domain([1,0]).range([2 * radiusCircleElement + 2, graphHeight - 2 * radiusCircleElement - 2])
 
     // Map the basic node data to d3-friendly format.
     let nodesElements = data.map((node) => {
       let nodeX = xScale(parseFloat(node[dimX]))
       let nodeY = yScale(parseFloat(node[dimY]))
-      let x0 = (nodeX + nodeY)*nodeX/(2 * Math.pow(Math.pow(nodeX, 2) + Math.pow(nodeY, 2), 0.5))
-      let y0 = (nodeX + nodeY)*nodeY/(2 * Math.pow(Math.pow(nodeX, 2) + Math.pow(nodeY, 2), 0.5))
       return {
         //radius: 0,
         //color: '#ff7f0e',
-        x: x0,
-        y: y0,
+        x: nodeX,
+        y: nodeY,
         nameElement: node[dimNameElement],
         sizeElement: parseFloat(node[dimSizeElement])
       };
     });
 
+    /* Create a force simulation to avoid circles overlapping */
     let simulation = d3.forceSimulation(nodesElements)
       .force("x", d3.forceX(function(d) { return d.x }))
       .force("y", d3.forceY(function(d) { return d.y }))
-      .force("collide", d3.forceCollide().radius(() => radiusCircleElement + 0.5))
+      .force("collide", d3.forceCollide().radius(() => radiusCircleElement))
       .force("manyBody", d3.forceManyBody().strength(-10))
       .stop();
 
     for (var i = 0; i < 200; ++i) simulation.tick()
 
+    /* Draw dataset elements to the graph on the arcs */
     let elementSpace = arcsSpace.selectAll('g')
       .data(nodesElements)
       .enter().append('g')
       .attr("class", "elementSpace")
-      .attr('transform', 'translate(' + (20 + radiusCircleElement) + ',' + (20 + radiusCircleElement) + ')')
 
       elementSpace.append('circle')
       .attr("r", radiusCircleElement)
@@ -226,28 +316,6 @@ let dataTest = [
       .attr('dy', '.75em')
       .attr('text-anchor', 'left')
       .attr('alignment-baseline', 'bottom')
-
-    /* Draw dataset elements to the graph on the arcs */
-    /* let elements = arcsSpace.selectAll(".element")
-      .data(nodesElements)
-      .enter().append("g")
-      .attr('class', 'element')
-      .attr('transform', 'translate(20, 20)')
-
-      elements.append('circle')
-      .attr("class", "circleElement")
-      .attr("r", radiusCircleElement)
-      .attr("cx", xMap)
-      .attr("cy", yMap)
-      .style("fill", 'grey')
-
-    elements.append('text')
-      .text(el => el[dimNameElement])
-      .attr('x', el => xMap(el) + radiusCircleElement)
-      .attr('y', yMap)
-      .attr('dy', '.75em')
-      .attr('text-anchor', 'left')
-      .attr('alignment-baseline', 'bottom') */
 
     /* function that returns a color over a radient depending on the weight (between 0 and 1) */
     function pickHex(weight, color1, color2) {
