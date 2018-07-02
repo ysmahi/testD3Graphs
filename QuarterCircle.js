@@ -119,18 +119,21 @@ let dataTest = [
     let dimX = "Strategy"
     let dimY = "CurrentOffering"
     let dimSizeElement = "MarketPresence"
+    let dimColorElements = "MarketPresence"
+    let colorGood = {red: 0, green: 255, blue: 0}
+    let colorBad = {red: 255, green: 0, blue: 0}
     // Name of arcs
     let nameQuarterArcs = ['Leaders', 'Strong Performers', 'Contenders', 'Challengers']
 
     // Definition of graph lengths
-    let rawWidth = 800
-    let rawHeight = 800
-    let borderGraph = 50
-    let graphWidth = rawWidth - 3 * borderGraph
-    let graphHeight = rawHeight - 3 * borderGraph
+    let rawWidth = 900
+    let rawHeight = 900
+    let borderGraph = rawHeight / 18
+    let graphWidth = rawWidth - 4 * borderGraph
+    let graphHeight = rawHeight - 4 * borderGraph
     let widthFirstArc = graphWidth / 3
     let widthMiddleArcs = graphWidth / 4
-    let radiusCircleElement = 20
+    let radiusCircleElement = rawWidth / 45
 
     let svgGraph = d3.select('body').append('svg')
       .attr('class', 'graph')
@@ -168,9 +171,9 @@ let dataTest = [
 
     xAxisSpace.append('line')
       .attr("class", "arrow")
-      .attr("x2", borderGraph + 10)
+      .attr("x1", 2 * borderGraph + graphWidth)
+      .attr("x2", 2 * borderGraph + 10)
       .attr("y1", 1.5 * borderGraph + graphHeight)
-      .attr("x1", borderGraph + graphWidth)
       .attr("y2", 1.5 * borderGraph + graphHeight)
       .style("marker-end", "url(#arrow)")
       .style('stroke', 'black')
@@ -180,7 +183,13 @@ let dataTest = [
       .attr('x', d => d.x0 + d.width / 2)
       .attr('y', d => d.y0 + d.height / 5)
       .attr('dy', '.75em')
-      .text(dimX)
+      .html(() => {
+        let html = ''
+        dimX.replace(/([a-z](?=[A-Z]))/g, '$1 \n').split('\n').forEach(string => {
+          html += '<br>' + string + '</br>'
+        })
+        return html
+      })
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'middle')
 
@@ -188,7 +197,7 @@ let dataTest = [
     let yAxisSpace = svgGraph.selectAll('.yAxisSpace')
       .data([{
         x0:  0,
-        width: borderGraph,
+        width: 2 * borderGraph,
         y0: borderGraph,
         height: 2 * borderGraph + graphHeight,
         nameYAxis: dimY
@@ -214,9 +223,9 @@ let dataTest = [
 
     yAxisSpace.append('line')
       .attr("class", "arrow")
-      .attr("x2", borderGraph / 2)
+      .attr("x1", borderGraph)
+      .attr("x2", borderGraph)
       .attr("y1", borderGraph + graphHeight)
-      .attr("x1", borderGraph / 2)
       .attr("y2", borderGraph + 10)
       .style("marker-end", "url(#arrow)")
       .style('stroke', 'black')
@@ -226,13 +235,13 @@ let dataTest = [
       .attr('x', d => d.x0 + d.width / 2)
       .attr('y', d => d.y0 + d.height / 2)
       .attr('dy', '.75em')
-      .text(dimY)
+      .html(dimY.replace(/([a-z](?=[A-Z]))/g, '$1 \n'))
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'middle')
 
     /* Create quarter of arcs */
     let arcsSpace = svgGraph.append('g')
-      .attr('transform', 'translate(' + borderGraph + ',' + borderGraph + ')')
+      .attr('transform', 'translate(' + 2 * borderGraph + ',' + borderGraph + ')')
       .attr('class', 'arcsSpace')
 
     arcsSpace.append('rect')
@@ -270,7 +279,7 @@ let dataTest = [
         .attr('y', 0)
         .attr('dy', '.75em')
         .text(nameArc)
-        .attr('transform', 'translate(' + borderGraph +',' + (borderGraph - 20) + ')')
+        .attr('transform', 'translate(' + 2 * borderGraph +',' + (borderGraph - 20) + ')')
         .attr('text-anchor', 'left')
         .attr('alignment-baseline', 'middle')
 
@@ -353,7 +362,8 @@ let dataTest = [
         x: nodeX,
         y: nodeY,
         nameElement: node[dimNameElement],
-        sizeElement: parseFloat(node[dimSizeElement])
+        sizeElement: (dimSizeElement)?parseFloat(node[dimSizeElement]):0.5,
+        colorElement: (dimColorElements)?pickHex(node[dimColorElements], colorGood, colorBad):'grey'
       };
     });
 
@@ -377,7 +387,7 @@ let dataTest = [
       .attr("r", d => (d.sizeElement + 0.1) * radiusCircleElement)
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
-      .style("fill", 'grey')
+      .style("fill", d => d.colorElement)
 
     elementSpace.append('text')
       .text(el => el.nameElement)
