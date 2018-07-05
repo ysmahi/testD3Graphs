@@ -415,30 +415,6 @@ let dataTest = [
     // Avoid label overlaping
     arrangeLabels('.labelCircle')
 
-    // Define behaviour when drag and drop
-    /* //Create the drag and drop behavior to set for the objects crated
-    var drag = d3.drag()
-      .subject(function(d) { return d; })
-      .on("start", dragstarted)
-      .on("drag", dragged);
-
-    //Called when drag event starts. It stop the propagation of the click event
-    function dragstarted(d){
-      d3.event.sourceEvent.stopPropagation();
-    }
-
-    //Called when the drag event occurs (object should be moved)
-    function dragged(d){
-      d.x = d3.event.x;
-      d.y = d3.event.y;
-      //Translate the object on the actual moved point
-      d3.select(this).attr({
-        transform: "translate(" + d.x + "," + d.y + ")"
-      });
-    }
-
-    nodes = svgGraph.selectAll(".draggable").call(drag).data(nodesElements) */
-
     /* function that returns a color over a radient depending on the weight (between 0 and 1) */
     function pickHex(weight, color1, color2) {
       let w1 = weight;
