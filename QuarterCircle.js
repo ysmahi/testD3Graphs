@@ -362,7 +362,7 @@ let dataTest = [
       .force("x", d3.forceX(function(d) { return d.x }))
       .force("y", d3.forceY(function(d) { return d.y }))
       .force("collide", d3.forceCollide().radius((d) => (d.sizeElement + 0.1) * radiusCircleElement))
-      .force("manyBody", d3.forceManyBody().strength(-10))
+      //.force("manyBody", d3.forceManyBody().strength(-10))
       .stop();
 
     for (var i = 0; i < 200; ++i) simulation.tick()

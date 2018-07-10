@@ -412,7 +412,7 @@ function createGridChart(data, chartOptions) {
     .attr("class", "Row");
 
   // Create all cells
-  var cell = row.selectAll(".Cell")
+  let cell = row.selectAll(".Cell")
     .data(function(row) { return row; })
     .enter()
     .append('g')
@@ -510,297 +510,11 @@ function createGridChart(data, chartOptions) {
   console.log('maxCellWidth', maxCellWidth)
   console.log('maxVertElements', maxCellHeight)
 
-  // Create a g for each cell (inCell is in front of cell, same size)
-   /* inCell = cell.append('g')
-    .attr('class', 'InCell')
-    .attr('id', inCell => {
-      if (typeof inCell.rowName !== 'undefined') {
-        return '' + inCell.rowName + inCell.columnName
-      }
-    })
+  // Drawing of vertical elements and creating
+  draw(verticalElementsData)
+  draw(horizontalElementsData)
 
-  // Create a grid of <svg> to be later usable to put elements inside
-  inCell.selectAll('svg')
-    .data(inCell => {
-      let posSvg = []
-      for(let i=0; i<maxElementInCell; i++) {
-        posSvg[i] = {x: inCell.x + (i%maxCellWidth)*(inCell.width/maxCellWidth),
-          y: inCell.y + (Math.trunc(i/maxCellWidth))*(inCell.height/maxCellHeight),
-          width: inCell.width/maxCellWidth,
-          height: inCell.height/maxCellHeight,
-          posInCell: i,
-          rowName: inCell.rowName,
-          columnName: inCell.columnName}
-      }
-      return posSvg
-    })
-    .enter()
-    .append ('svg')
-    .attr('isEmpty', 'true')
-    */
-
-  // Drawing of vertical elements
-  drawElements(verticalElementsData)
-  drawElements(horizontalElementsData)
-  drawElements(singleElementsData)
-
-  // Create element inside for each item of dataset that is on more than a dimension
-  /*
-  verticalElementsData.forEach(vertEl => {
-
-    let vValue = 0
-    let hValue = 0
-    vertEl.rowsName.forEach(function (row, i, allRows) {
-      let iMiddle = Math.trunc(allRows.length/2)
-      if (i === 0) {
-        // Create top of element in the upper row
-        let cellsGridMatrix = getCellMatrix(grid,
-          '#' + vertEl.rowsName[i] + vertEl.columnName,
-          maxCellWidth,
-          maxElementInCell)
-        // get left lower part of the cell
-        for (var v = 0; v < maxCellHeight; v++) {
-          for (var h = 0; h < maxCellWidth; h++) {
-            if (cellsGridMatrix[v][h].attr('isEmpty') === 'true') {
-              if ((h < hValue && v === vValue) || v > vValue) {
-                hValue = h
-                vValue = v
-              }
-            }
-          }
-        }
-
-        // Create top of element
-        cellsGridMatrix[vValue][hValue].append('rect')
-          .attr('x', svg => svg.x)
-          .attr('y', svg => svg.y + svg.height / 2)
-          .attr('width', svg => svg.width)
-          .attr('height', svg => svg.height / 2 + 3)
-          .style('fill', "red")
-
-        cellsGridMatrix[vValue][hValue].append('circle')
-          .attr('cx', svg => svg.x + svg.width / 2)
-          .attr('cy', svg => svg.y + svg.height / 2)
-          .attr('r', svg => Math.min(svg.width / 2, svg.height / 2))
-          .attr('fill', 'red')
-
-        cellsGridMatrix[vValue][hValue].attr('isEmpty', 'false')
-      }
-
-      else if (i>0 && i !== allRows.length -1) {
-        // Create Middle parts of the element
-        let matrixSelectionMiddleSvg = getCellMatrix(grid,
-          '#' + vertEl.rowsName[i] + vertEl.columnName,
-          maxCellWidth,
-          maxElementInCell)
-
-        let vMiddle = (allRows.length%2===0)?0:Math.trunc(maxCellHeight / 2)
-
-        for (let v=0; v<maxCellHeight; v++) {
-          // Create the body of the element on each row of the cell
-          matrixSelectionMiddleSvg[v][hValue].append('rect')
-            .attr('x', svg => svg.x)
-            .attr('y', svg => svg.y)
-            .attr('width', svg => svg.width)
-            .attr('height', svg => svg.height + 3)
-            .style('fill', "red")
-
-          matrixSelectionMiddleSvg[v][hValue].attr('isEmpty', 'false')
-
-          if (v === vMiddle && i === iMiddle) {
-            // Append name of vertical element
-            matrixSelectionMiddleSvg[v][hValue].append('text')
-              .attr('x', svg => svg.x + svg.width / 2)
-              .attr('y', svg => {
-                return (allRows.length % 2 === 0) ? svg.y : (maxCellHeight % 2 === 0) ? svg.y : (svg.y + svg.height / 2)
-              })
-              .attr('text-anchor', 'middle')
-              .attr('alignment-baseline', 'central')
-              .text(vertEl.nameInsideElement)
-          }
-        }
-      }
-
-      else if (i === allRows.length -1) {
-        // Create the lower part of the element in the lower row
-        let matrixSelectionLowerSvg = getCellMatrix(grid,
-          '#' + vertEl.rowsName[i] + vertEl.columnName,
-          maxCellWidth,
-          maxElementInCell)
-
-        // Create top of element
-        matrixSelectionLowerSvg[0][hValue].append('rect')
-          .attr('x', svg => svg.x)
-          .attr('y', svg => svg.y)
-          .attr('width', svg => svg.width)
-          .attr('height', svg => svg.height / 2)
-          .style('fill', "red")
-
-        matrixSelectionLowerSvg[0][hValue].append('circle')
-          .attr('cx', svg => svg.x + svg.width / 2)
-          .attr('cy', svg => svg.y + svg.height / 2)
-          .attr('r', svg => Math.min(svg.width / 2, svg.height / 2))
-          .attr('fill', 'red')
-
-        matrixSelectionLowerSvg[0][hValue].attr('isEmpty', 'false')
-
-        // Append name of element if it is a two rows element
-        if (allRows.length === 2) {
-          matrixSelectionLowerSvg[0][hValue].append('text')
-            .attr('x', svg => svg.x + svg.width / 2)
-            .attr('y', svg => svg.y)
-            .attr('text-anchor', 'middle')
-            .attr('alignment-baseline', 'central')
-            .text(vertEl.nameInsideElement)
-        }
-      }
-    })
-  }) */
-
-  // Create horizontal elements
-  /* horizontalElementsData.forEach(horizEl => {
-    let vValue = 0
-    let hValue = 0
-    horizEl.columnsName.forEach(function (col, i, allColumns) {
-      let iMiddle = Math.trunc(allColumns.length/2)
-      if (i === 0) {
-        // Create left of element in the left column
-        let matrixSelectionLeftSvg = getCellMatrix(grid,
-          '#' + horizEl.rowName + horizEl.columnsName[i],
-          maxCellWidth,
-          maxElementInCell)
-        // get right upper part of the cell
-        for (var v = maxCellHeight - 1; v > -1; v--) {
-          for (var h = maxCellWidth  - 1; h > -1; h--) {
-            if (matrixSelectionLeftSvg[v][h].attr('isEmpty') === 'true') {
-              if ((v < vValue && h === hValue) || h > hValue) {
-                hValue = h
-                vValue = v
-              }
-            }
-          }
-        }
-
-        // Create left of element
-        matrixSelectionLeftSvg[vValue][hValue].append('rect')
-          .attr('x', svg => svg.x)
-          .attr('y', svg => svg.y)
-          .attr('width', svg => svg.width + 3)
-          .attr('height', svg => svg.height)
-          .style('fill', "green")
-
-        matrixSelectionLeftSvg[vValue][hValue].attr('isEmpty', 'false')
-      }
-
-      else if (i>0 && i !== allColumns.length -1) {
-        // Create Middle parts of the element
-        let matrixSelectionMiddleSvg = getCellMatrix(grid,
-          '#' + horizEl.rowName + horizEl.columnsName[i],
-          maxCellWidth,
-          maxElementInCell)
-
-        let hMiddle = (allColumns.length%2===0)?0:Math.trunc(maxCellWidth / 2)
-
-        for (let h = 0; h < maxCellWidth; h++) {
-          // Create the body of the element on each row of the cell
-          matrixSelectionMiddleSvg[vValue][h].append('rect')
-            .attr('x', svg => svg.x)
-            .attr('y', svg => svg.y)
-            .attr('width', svg => svg.width + 3)
-            .attr('height', svg => svg.height)
-            .style('fill', "green")
-            .style('opacity', d => (matrixSelectionMiddleSvg[vValue][h].attr('isEmpty') === 'false') ? 0.5 : 1)
-
-          matrixSelectionMiddleSvg[vValue][h].attr('isEmpty', 'false')
-
-          // Append name of horizontal element
-          if (i === iMiddle && h === hMiddle) {
-            matrixSelectionMiddleSvg[vValue][h].append('text')
-              .attr('x', svg => {
-                return (allColumns.length % 2 === 0) ? svg.x : (maxCellWidth % 2 === 0) ? svg.x : (svg.x + svg.width / 2)
-              })
-              .attr('y', svg => svg.y + svg.height / 2)
-              .attr('text-anchor', 'middle')
-              .attr('alignment-baseline', 'central')
-              .text(horizEl.nameInsideElement)
-          }
-        }
-      }
-
-      else if (i === allColumns.length - 1) {
-        // Create the right part of the element in the right column
-        let matrixSelectionRightSvg = getCellMatrix(grid,
-          '#' + horizEl.rowName + horizEl.columnsName[i],
-          maxCellWidth,
-          maxElementInCell)
-
-        // Create right of element
-        matrixSelectionRightSvg[vValue][0].append('rect')
-          .attr('x', svg => svg.x)
-          .attr('y', svg => svg.y)
-          .attr('width', svg => svg.width)
-          .attr('height', svg => svg.height)
-          .style('fill', "green")
-          .style('opacity', d => (matrixSelectionRightSvg[vValue][0].attr('isEmpty') === 'false')?0.5:1)
-
-        matrixSelectionRightSvg[vValue][0].attr('isEmpty', 'false')
-
-        // Append name of element if it is a two rows element
-        if (allColumns.length === 2) {
-          matrixSelectionRightSvg[vValue][0].append('text')
-            .attr('x', svg => svg.x)
-            .attr('y', svg => svg.y + svg.height / 2)
-            .attr('text-anchor', 'middle')
-            .attr('alignment-baseline', 'central')
-            .text(horizEl.nameInsideElement)
-        }
-      }
-    })
-  })
-
-  // Create single elements
-  singleElementsData.forEach((element, i) => {
-    let matrixSelectionSvg = getCellMatrix(grid,
-      '#' + element[dimRow] + element[dimColumn],
-      maxCellWidth,
-      maxElementInCell)
-
-    let xCenter = maxCellWidth / 2
-    let yCenter = maxCellHeight / 2
-    let dist = Math.pow(Math.pow(xCenter, 2) + Math.pow(yCenter, 2), 0.5)
-    let iRow = 0
-    let jCol = 0
-
-    matrixSelectionSvg.forEach((row, i) => {
-      row.forEach((cell, j) => {
-        if (cell.attr('isEmpty') === 'true') {
-          if ((Math.pow(Math.pow(xCenter - j - 0.5, 2) + Math.pow(yCenter - i - 0.5, 2), 0.5)) < dist) {
-            iRow = i
-            jCol = j
-            dist = Math.pow(Math.pow(xCenter - jCol - 0.5, 2) + Math.pow(yCenter - iRow - 0.5, 2), 0.5)
-          }
-        }
-      })
-    })
-
-    matrixSelectionSvg[iRow][jCol].append('circle')
-      .attr('cx', svg => svg.x + svg.width/2)
-      .attr('cy', svg => svg.y + svg.height/2)
-      .attr('r', svg => Math.min(svg.height/2, svg.width/2))
-      .attr('fill', '#66ccff')
-
-    matrixSelectionSvg[iRow][jCol].append('text')
-      .attr('x', svg => svg.x + svg.width/2)
-      .attr('y', svg => svg.y + svg.height/2)
-      .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'central')
-      .text(element[dimElementInside])
-
-    matrixSelectionSvg[iRow][jCol].attr('isEmpty', 'false')
-  })
-
-  console.log('sel', getCellMatrix(grid, '#Brand1Finance', maxCellWidth, maxElementInCell))
-  */
+  //drawElements(singleElementsData)
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -845,16 +559,14 @@ function createGridChart(data, chartOptions) {
     return matrix
   }
 
-  /* Draw all elements on double entry table */
-  function drawElements (elementsData) {
-    let elementsSpace = grid.append('svg')
-      .attr('class', 'superimposedElementsSpace')
+  /* Draw all elements on double entry table and returns data of elements */
+  function createElementsPositionData (elementsData) {
+
+    let dataRectangles = []
+    let smallMove = 0
 
     elementsData.forEach(element => {
       let elementIsVertical = (element.hasOwnProperty('rowsName'))
-
-      let elementSelection = elementsSpace.append('g')
-        .attr('class', 'element')
 
       let idCellBeginning = (elementIsVertical)?
         '#' + element.rowsName[0] + element.columnName:
@@ -882,26 +594,175 @@ function createGridChart(data, chartOptions) {
         yEnd - yBeginning + cellHeight:
         cellHeight / 3
 
+      dataRectangles.push({
+        idealX: xBeginning,
+        idealY: yBeginning,
+        x: (elementIsVertical)?xBeginning + smallMove:xBeginning,
+        y: (elementIsVertical)?yBeginning:yBeginning + smallMove,
+        size: [widthElement, heightElement],
+        nameInsideElement: element.nameInsideElement,
+        colorElement: (elementIsVertical)?'red':'green'
+      })
+
+      // smallMove is used so that no rectangle are exactly at the same position so that tick() works
+      smallMove++
+    })
+
+    // Changes rectangles position so there is no overlapping
+    avoidOverlapping(dataRectangles)
+
+    return dataRectangles
+  }
+
+  /* Function to draw all elements on the graph */
+  function draw(elementsData) {
+    let dataRectangles = createElementsPositionData(elementsData)
+
+    let elementsSpace = grid.append('svg')
+      .attr('class', 'superimposedElementsSpace')
+
+    dataRectangles.forEach(rectangle => {
+      let elementSelection = elementsSpace.append('g')
+        .attr('class', 'element')
+
       elementSelection.append('rect')
-        .attr('x', xBeginning)
-        .attr('y', yBeginning)
-        .attr('width', widthElement)
-        .attr('height', heightElement)
-        .style('fill', () => {
-          return (elementIsVertical)?
-            'red':
-            'green'
-        })
-        .attr('class', element.nameInsideElement)
+        .attr('x', rectangle.x)
+        .attr('y', rectangle.y)
+        .attr('width', rectangle.size[0])
+        .attr('height', rectangle.size[1])
+        .style('fill', rectangle.colorElement)
+        .attr('class', rectangle.nameInsideElement)
+        .style('stroke', 'black')
 
       elementSelection.append('text')
-        .attr('x', xBeginning + widthElement / 2)
-        .attr('y', yBeginning + heightElement / 2)
+        .attr('x', rectangle.x + rectangle.size[0] / 2)
+        .attr('y', rectangle.y + rectangle.size[1] / 2)
         .attr('dy', '.3em')
-        .text(element.nameInsideElement)
+        .text(rectangle.nameInsideElement)
         .attr('text-anchor', 'middle')
-        // .attr('alignment-baseline', 'central')
+
     })
+
+  }
+
+  /* Creates force simulation to avoid overlapping of elements
+   * elements direction must be 'vertical' to avoid overlapping of verticalElements
+    * or 'horizontal' if horizontal */
+  function avoidOverlapping (elementsData) {
+
+    let collisionForce = rectCollide()
+      .size((rectangle) => rectangle.size)
+
+    let simulation = d3.forceSimulation(elementsData)
+      .velocityDecay(0)
+      .alphaTarget(1)
+      .force("x", d3.forceX(function(element) { return element.idealX }))
+      .force("y", d3.forceY(function(element) { return element.idealY }))
+      .force("collision", collisionForce)
+      .stop()
+
+    for (let i = 0; i < 200; ++i) simulation.tick()
+  }
+
+  function rectCollide() {
+    let nodes, sizes, masses
+    let size = constant([0, 0])
+    let strength = 1
+    let iterations = 1
+
+    function force() {
+      let node, size, mass, xi, yi
+      let i = -1
+      while (++i < iterations) { iterate() }
+
+      function iterate() {
+        let j = -1
+        let tree = d3.quadtree(nodes, xCenter, yCenter).visitAfter(prepare)
+
+        while (++j < nodes.length) {
+          node = nodes[j]
+          size = sizes[j]
+          mass = masses[j]
+          xi = xCenter(node)
+          yi = yCenter(node)
+
+          tree.visit(apply)
+        }
+      }
+
+      function apply(quad, x0, y0, x1, y1) {
+        let data = quad.data
+        let xSize = (size[0] + quad.size[0]) / 2
+        let ySize = (size[1] + quad.size[1]) / 2
+        if (data) {
+          if (data.index <= node.index) { return }
+
+          let x = xi - xCenter(data)
+          let y = yi - yCenter(data)
+          let xd = Math.abs(x) - xSize
+          let yd = Math.abs(y) - ySize
+
+          if (xd < 0 && yd < 0) {
+            let l = Math.sqrt(x * x + y * y)
+            let m = masses[data.index] / (mass + masses[data.index])
+
+            if (Math.abs(xd) < Math.abs(yd)) {
+              node.vx -= (x *= xd / l * strength) * m
+              data.vx += x * (1 - m)
+            } else {
+              node.vy -= (y *= yd / l * strength) * m
+              data.vy += y * (1 - m)
+            }
+          }
+        }
+
+        return x0 > xi + xSize || y0 > yi + ySize ||
+          x1 < xi - xSize || y1 < yi - ySize
+      }
+
+      function prepare(quad) {
+        if (quad.data) {
+          quad.size = sizes[quad.data.index]
+        } else {
+          quad.size = [0, 0]
+          let i = -1
+          while (++i < 4) {
+            if (quad[i] && quad[i].size) {
+              quad.size[0] = Math.max(quad.size[0], quad[i].size[0])
+              quad.size[1] = Math.max(quad.size[1], quad[i].size[1])
+            }
+          }
+        }
+      }
+    }
+
+    function xCenter(d) { return d.x + d.vx + sizes[d.index][0] / 2 }
+    function yCenter(d) { return d.y + d.vy + sizes[d.index][1] / 2 }
+
+    force.initialize = function (_) {
+      sizes = (nodes = _).map(size)
+      masses = sizes.map(function (d) { return d[0] * d[1] })
+    }
+
+    force.size = function (_) {
+      return (arguments.length
+        ? (size = typeof _ === 'function' ? _ : constant(_), force)
+        : size)
+    }
+
+    force.strength = function (_) {
+      return (arguments.length ? (strength = +_, force) : strength)
+    }
+
+    force.iterations = function (_) {
+      return (arguments.length ? (iterations = +_, force) : iterations)
+    }
+
+    return force
+  }
+
+  function constant(_) {
+    return function () { return _ }
   }
 }
 
