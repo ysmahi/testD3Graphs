@@ -574,7 +574,7 @@ function createGridChart(data, chartOptions) {
   draw(verticalElementsData)
   draw(horizontalElementsData)
 
-  //drawElements(singleElementsData)
+  drawSingle(singleElementsData)
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -622,13 +622,16 @@ function createGridChart(data, chartOptions) {
   /* Create an array of objects, each one of them contains all the data necessary to define an element visually  */
   function createElementsPositionData (elementsData) {
 
-    let dataRectangles = []
+    let dataElements = []
     let smallMove = 0
+    let elementIsSingle
 
     elementsData.forEach(element => {
       let elementIsVertical = (element.hasOwnProperty('rowsName'))
+      elementIsSingle = (!element.hasOwnProperty('rowsName') && !element.hasOwnProperty('columnsName'))
 
-      let idCellBeginning = (elementIsVertical)?
+      let idCellBeginning = (elementIsSingle)?'#' + element[dimRow] + element[dimColumn]:
+        (elementIsVertical)?
         '#' + element.rowsName[0] + element.columnName:
         '#' + element.rowName + element.columnsName[0]
 
@@ -636,7 +639,8 @@ function createGridChart(data, chartOptions) {
       let xBeginning = cellBeginning.datum().x
       let yBeginning = cellBeginning.datum().y
 
-      let idCellEnd = (elementIsVertical)?
+      let idCellEnd = (elementIsSingle)?'#' + element[dimRow] + element[dimColumn]:
+        (elementIsVertical)?
         '#' + element.rowsName[element.rowsName.length - 1] + element.columnName:
         '#' + element.rowName + element.columnsName[element.columnsName.length - 1]
 
@@ -646,6 +650,11 @@ function createGridChart(data, chartOptions) {
       let cellWidth = cellEnd.datum().width
       let cellHeight = cellEnd.datum().height
 
+      let radiusElement = (elementIsSingle)?20:0
+
+      let xCenter = xBeginning + cellWidth / 2
+      let yCenter = yBeginning + cellHeight / 2
+
       let widthElement = (elementIsVertical)?
         cellWidth / 3:
         xEnd - xBeginning + cellWidth
@@ -654,14 +663,15 @@ function createGridChart(data, chartOptions) {
         yEnd - yBeginning + cellHeight:
         cellHeight / 3
 
-      dataRectangles.push({
-        idealX: (elementIsVertical)?xBeginning + widthElement:xBeginning,
-        idealY: (elementIsVertical)?yBeginning:yBeginning + heightElement,
+      dataElements.push({
+        idealX: (elementIsSingle)?xCenter:(elementIsVertical)?xBeginning + widthElement:xBeginning,
+        idealY: (elementIsSingle)?yCenter:(elementIsVertical)?yBeginning:yBeginning + heightElement,
         x: (elementIsVertical)?xBeginning + smallMove:xBeginning,
         y: (elementIsVertical)?yBeginning:yBeginning + smallMove,
         size: [widthElement, heightElement],
-        nameInsideElement: element.nameInsideElement,
-        colorElement: (elementIsVertical)?'red':'green'
+        radius: radiusElement,
+        nameInsideElement: (elementIsSingle)?element[dimElementInside]:element.nameInsideElement,
+        colorElement: (elementIsSingle)?'skyblue':(elementIsVertical)?'red':'green'
       })
 
       // smallMove is used so that no elements are exactly at the same position so that tick() works
@@ -669,19 +679,20 @@ function createGridChart(data, chartOptions) {
     })
 
     // Changes rectangles position so there is no overlapping and each element is on one row or one column
-    moveToRightPlace(dataRectangles)
+    let formOfElement = (elementIsSingle)?'circles':'rectangles'
+    moveToRightPlace(dataElements, formOfElement)
 
-    return dataRectangles
+    return dataElements
   }
 
   /* Function to draw all elements on the graph */
   function draw(elementsData) {
-    let dataRectangles = createElementsPositionData(elementsData)
+    let dataElements = createElementsPositionData(elementsData)
 
     let elementsSpace = grid.append('svg')
       .attr('class', 'superimposedElementsSpace')
 
-    dataRectangles.forEach(rectangle => {
+    dataElements.forEach(rectangle => {
       let elementSelection = elementsSpace.append('g')
         .attr('class', 'element')
 
@@ -702,16 +713,16 @@ function createGridChart(data, chartOptions) {
         .attr('text-anchor', 'middle')
 
     })
-
   }
 
   /* Draw single elements as circles on the graph */
   function drawSingle (dataElementsSingle) {
-    let dataPositionElements = createElementsPositionData(dataElementsSingle)
+    let data = createElementsPositionData(dataElementsSingle)
 
-    let elementsSpace = grid.select('superimposedElementsSpace')
+    let elementsSpace = grid.append('svg')
+      .attr('class', 'superimposedSingleElementsSpace')
 
-    dataElementsSingle.forEach(singleElement => {
+    data.forEach(singleElement => {
       let elementSelection = elementsSpace.append('g')
         .attr('class', 'element')
 
@@ -723,35 +734,31 @@ function createGridChart(data, chartOptions) {
 
       elementSelection.append('text')
         .attr('x', singleElement.x )
-        .attr('y', rectangle.y )
+        .attr('y', singleElement.y )
         .attr('dy', '.3em')
-        .text(rectangle.nameInsideElement)
+        .text(singleElement.nameInsideElement)
         .attr('text-anchor', 'middle')
     })
   }
 
   /* Creates force simulation to avoid overlapping of elements
    * and a force simulation to ensure each element is not out of a row or a column */
-  function moveToRightPlace (elementsData) {
+  function moveToRightPlace (elementsData, formOfElement) {
+    let elementsAreCircles = (formOfElement === 'circles')
+    let elementsAreRectangles = (formOfElement === 'rectangles')
 
-    let collisionForce = rectCollide()
-      .size(element => [element.size[0], element.size[1]])
+    let collisionForce
+    if (elementsAreRectangles) collisionForce = rectCollide().size(rectangle => [rectangle.size[0], rectangle.size[1]])
+    if (elementsAreCircles) collisionForce = d3.forceCollide().radius(circle => circle.radius)
 
     let simulation = d3.forceSimulation(elementsData)
-      //.velocityDecay(0)
-      //.alphaTarget(1)
       .force("x", d3.forceX(function(element) { return element.idealX }))
       .force("y", d3.forceY(function(element) { return element.idealY }))
       .force("collision", collisionForce)
-      //.on('tick', checkPosition(elementsData))
       .stop()
 
     for (let i = 0; i < 200 ; ++i) simulation.tick()
   }
-
-  /*function checkPosition (elementsData) {
-    elementsData.attr('')
-  }*/
 
   function rectCollide() {
     let nodes, sizes, masses
