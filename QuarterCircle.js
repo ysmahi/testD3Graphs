@@ -15,6 +15,12 @@ let dataTest = [
     "MarketPresence": 1
   },
   {
+    "CompanyName": "Company Uno",
+    "Strategy": "0.4",
+    "CurrentOffering": "0.6",
+    "MarketPresence": 1
+  },
+  {
     "CompanyName": "Company 2",
     "Strategy": "0.8",
     "CurrentOffering": "0.7",

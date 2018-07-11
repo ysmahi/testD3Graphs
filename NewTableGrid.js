@@ -14,10 +14,16 @@ let dataTest = [
     "Branch": "Finance",
     "CompanyBrand": "Brand3"
   },
+
   {
-    "AppName": "App6",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand3"
+    "AppName": "App78",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App78",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand2"
   },
   {
     "AppName": "App1",
@@ -30,14 +36,28 @@ let dataTest = [
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App30",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand1"
+    "AppName": "App2",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand2"
+  },{
+    "AppName": "App2",
+    "Branch": "Finance",
+    "CompanyBrand": "Brand4"
   },
   {
     "AppName": "App2",
     "Branch": "Finance",
-    "CompanyBrand": "Brand2"
+    "CompanyBrand": "Brand5"
+  },
+  {
+    "AppName": "App6",
+    "Branch": "Tech",
+    "CompanyBrand": "Brand3"
+  },
+  {
+    "AppName": "App30",
+    "Branch": "Tech",
+    "CompanyBrand": "Brand1"
   },
   {
     "AppName": "App3",
@@ -75,6 +95,26 @@ let dataTest = [
   },
   {
     "AppName": "App4",
+    "Branch": "Sales",
+    "CompanyBrand": "Brand5"
+  },
+  {
+    "AppName": "App62",
+    "Branch": "Sales",
+    "CompanyBrand": "Brand4"
+  },
+  {
+    "AppName": "App62",
+    "Branch": "Sales",
+    "CompanyBrand": "Brand5"
+  },
+  {
+    "AppName": "App112",
+    "Branch": "Sales",
+    "CompanyBrand": "Brand4"
+  },
+  {
+    "AppName": "App112",
     "Branch": "Sales",
     "CompanyBrand": "Brand5"
   },
@@ -126,7 +166,27 @@ let dataTest = [
   {
     "AppName": "App10",
     "Branch": "HR",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App10",
+    "Branch": "HR",
+    "CompanyBrand": "Brand2"
+  },
+  {
+    "AppName": "App10",
+    "Branch": "HR",
     "CompanyBrand": "Brand6"
+  },
+  {
+    "AppName": "App10b",
+    "Branch": "HR",
+    "CompanyBrand": "Brand1"
+  },
+  {
+    "AppName": "App10b",
+    "Branch": "HR",
+    "CompanyBrand": "Brand2"
   },
   {
     "AppName": "App11",
@@ -559,7 +619,7 @@ function createGridChart(data, chartOptions) {
     return matrix
   }
 
-  /* Draw all elements on double entry table and returns data of elements */
+  /* Create an array of objects, each one of them contains all the data necessary to define an element visually  */
   function createElementsPositionData (elementsData) {
 
     let dataRectangles = []
@@ -595,8 +655,8 @@ function createGridChart(data, chartOptions) {
         cellHeight / 3
 
       dataRectangles.push({
-        idealX: xBeginning,
-        idealY: yBeginning,
+        idealX: (elementIsVertical)?xBeginning + widthElement:xBeginning,
+        idealY: (elementIsVertical)?yBeginning:yBeginning + heightElement,
         x: (elementIsVertical)?xBeginning + smallMove:xBeginning,
         y: (elementIsVertical)?yBeginning:yBeginning + smallMove,
         size: [widthElement, heightElement],
@@ -604,12 +664,12 @@ function createGridChart(data, chartOptions) {
         colorElement: (elementIsVertical)?'red':'green'
       })
 
-      // smallMove is used so that no rectangle are exactly at the same position so that tick() works
+      // smallMove is used so that no elements are exactly at the same position so that tick() works
       smallMove++
     })
 
-    // Changes rectangles position so there is no overlapping
-    avoidOverlapping(dataRectangles)
+    // Changes rectangles position so there is no overlapping and each element is on one row or one column
+    moveToRightPlace(dataRectangles)
 
     return dataRectangles
   }
@@ -645,24 +705,53 @@ function createGridChart(data, chartOptions) {
 
   }
 
+  /* Draw single elements as circles on the graph */
+  function drawSingle (dataElementsSingle) {
+    let dataPositionElements = createElementsPositionData(dataElementsSingle)
+
+    let elementsSpace = grid.select('superimposedElementsSpace')
+
+    dataElementsSingle.forEach(singleElement => {
+      let elementSelection = elementsSpace.append('g')
+        .attr('class', 'element')
+
+      elementSelection.append('circle')
+        .attr('cx', singleElement.x)
+        .attr('cy', singleElement.y)
+        .attr('r', singleElement.radius)
+        .attr('fill', singleElement.colorElement)
+
+      elementSelection.append('text')
+        .attr('x', singleElement.x )
+        .attr('y', rectangle.y )
+        .attr('dy', '.3em')
+        .text(rectangle.nameInsideElement)
+        .attr('text-anchor', 'middle')
+    })
+  }
+
   /* Creates force simulation to avoid overlapping of elements
-   * elements direction must be 'vertical' to avoid overlapping of verticalElements
-    * or 'horizontal' if horizontal */
-  function avoidOverlapping (elementsData) {
+   * and a force simulation to ensure each element is not out of a row or a column */
+  function moveToRightPlace (elementsData) {
 
     let collisionForce = rectCollide()
-      .size((rectangle) => rectangle.size)
+      .size(element => [element.size[0], element.size[1]])
 
     let simulation = d3.forceSimulation(elementsData)
-      .velocityDecay(0)
-      .alphaTarget(1)
+      //.velocityDecay(0)
+      //.alphaTarget(1)
       .force("x", d3.forceX(function(element) { return element.idealX }))
       .force("y", d3.forceY(function(element) { return element.idealY }))
       .force("collision", collisionForce)
+      //.on('tick', checkPosition(elementsData))
       .stop()
 
-    for (let i = 0; i < 200; ++i) simulation.tick()
+    for (let i = 0; i < 200 ; ++i) simulation.tick()
   }
+
+  /*function checkPosition (elementsData) {
+    elementsData.attr('')
+  }*/
 
   function rectCollide() {
     let nodes, sizes, masses
@@ -756,6 +845,56 @@ function createGridChart(data, chartOptions) {
 
     force.iterations = function (_) {
       return (arguments.length ? (iterations = +_, force) : iterations)
+    }
+
+    return force
+  }
+
+  function boundedBox() {
+    let nodes, sizes
+    let bounds
+    let size = constant([0, 0])
+
+    function force() {
+      let node, size
+      let xi, x0, x1, yi, y0, y1
+      let i = -1
+      while (++i < nodes.length) {
+        node = nodes[i]
+        size = sizes[i]
+        xi = node.x + node.vx
+        x0 = bounds[0][0] - xi
+        x1 = bounds[1][0] - (xi + size[0])
+        yi = node.y + node.vy
+        y0 = bounds[0][1] - yi
+        y1 = bounds[1][1] - (yi + size[1])
+        if (x0 > 0 || x1 < 0) {
+          node.x += node.vx
+          node.vx = -node.vx
+          if (node.vx < x0) { node.x += x0 - node.vx }
+          if (node.vx > x1) { node.x += x1 - node.vx }
+        }
+        if (y0 > 0 || y1 < 0) {
+          node.y += node.vy
+          node.vy = -node.vy
+          if (node.vy < y0) { node.vy += y0 - node.vy }
+          if (node.vy > y1) { node.vy += y1 - node.vy }
+        }
+      }
+    }
+
+    force.initialize = function (_) {
+      sizes = (nodes = _).map(size)
+    }
+
+    force.bounds = function (_) {
+      return (arguments.length ? (bounds = _, force) : bounds)
+    }
+
+    force.size = function (_) {
+      return (arguments.length
+        ? (size = typeof _ === 'function' ? _ : constant(_), force)
+        : size)
     }
 
     return force
