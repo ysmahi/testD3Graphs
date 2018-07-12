@@ -39,7 +39,8 @@ let dataTest = [
     "AppName": "App2",
     "Branch": "Finance",
     "CompanyBrand": "Brand2"
-  },{
+  },
+  {
     "AppName": "App2",
     "Branch": "Finance",
     "CompanyBrand": "Brand4"
@@ -254,9 +255,11 @@ function getLowerLeftEmptyCell (selectionCellMatrix) {
 }
 
 function createGridChart(data, chartOptions) {
-  let dimColumn = 'Branch';
-  let dimRow = 'CompanyBrand';
+  let dimColumn = 'Branch'
+  let dimRow = 'CompanyBrand'
   let dimElementInside = 'AppName'
+  let rawWidth = 900
+  let rawHeight = 1000
 
   let divGridGraph = d3.select('body').append('div')
     .attr('class', 'gridGraph')
@@ -271,172 +274,19 @@ function createGridChart(data, chartOptions) {
   // Create dataset of elements that are on multiple dimensions
   let ElementInsideNames = data.map(el => el[dimElementInside]).filter((v, i, a) => a.indexOf(v) === i)
 
+  // Separation of vertical, horizontal and single elements
+  let separatedData = createMultiSingleData (data, dimRow, dimColumn, dimElementInside)
 
-  let namesDataMultiple = data.map(el => el[dimElementInside])
-    .filter((v, i, a) => !(a.indexOf(v) === i))
-    .filter((v, i, a) => a.indexOf(v) === i)
-
-  // Separation of vertical and horizontal elements
-  let horizontalElementsData = []
-  let verticalElementsData = []
-  let singleElementsData = data.filter(el => namesDataMultiple.indexOf(el[dimElementInside]) === -1)
-  namesDataMultiple.forEach(nameInsideElement => {
-    let rowsData = []
-    let rows = []
-    data.filter(item => item[dimElementInside] === nameInsideElement)
-      .forEach(el => {
-        rows.push(el[dimRow])
-        rowsData.push(el)
-      })
-
-    uniqueRowsName = rows.filter((v, i, a) => a.indexOf(v) === i)
-      .sort((a, b) => {
-        return rowsName.indexOf(a) - rowsName.indexOf(b)
-      })
-
-    uniqueRowsName.forEach(rowName => {
-      let cols = []
-      rowsData.filter(data => data[dimRow] === rowName)
-        .forEach(el => {
-          cols.push(el[dimColumn])
-        })
-      let nameUniqueCols = cols.filter((v, i, a) => a.indexOf(v) === i)
-        .sort((a, b) => {
-          return columnsName.indexOf(a) - columnsName.indexOf(b)
-        })
-
-      if (nameUniqueCols.length > 1) {
-        let cs = [nameUniqueCols[0]]
-        for (let l=1; l<nameUniqueCols.length; l++) {
-          if (columnsName.indexOf(nameUniqueCols[l]) - columnsName.indexOf(nameUniqueCols[l - 1]) > 1) {
-            // columns not next to each other
-            if (cs.length > 1) {
-              // element is on multiple columns next to each other
-              horizontalElementsData.push({
-                nameInsideElement: nameInsideElement,
-                columnsName: cs,
-                rowName: rowName
-              })
-            }
-            else {
-              let dataElement = {}
-              dataElement[dimElementInside] = nameInsideElement
-              dataElement[dimColumn] = cs[0]
-              dataElement[dimRow] = rowName
-              singleElementsData.push(dataElement)
-            }
-            cs = [nameUniqueCols[l]]
-            if (l === nameUniqueCols.length - 1) {
-              let dataElement = {}
-              dataElement[dimElementInside] = nameInsideElement
-              dataElement[dimColumn] = cs[0]
-              dataElement[dimRow] = rowName
-              singleElementsData.push(dataElement)
-            }
-          }
-          else {
-            cs.push(nameUniqueCols[l])
-            if (l === nameUniqueCols.length - 1) {
-              horizontalElementsData.push({
-                nameInsideElement: nameInsideElement,
-                columnsName: cs,
-                rowName: rowName
-              })
-            }
-          }
-        }
-      }
-      else {
-        let r = []
-        let nameCol = nameUniqueCols[0]
-        r = rowsData.filter(el => el[dimColumn] === nameCol)
-          .map(el => el[dimRow])
-          .filter((v, i, a) => a.indexOf(v) === i)
-          .sort((a, b) => {
-            return rowsName.indexOf(a) - rowsName.indexOf(b)
-          })
-
-        if (r.length > 1) {
-          let rs = [r[0]]
-          for (let l=1; l<r.length; l++) {
-            if (rowsName.indexOf(r[l]) - rowsName.indexOf(r[l - 1]) > 1) {
-              // rows not next to each other
-              if (rs.length > 1) {
-                // element is on multiple rows next to each other
-                verticalElementsData.push({
-                  nameInsideElement: nameInsideElement,
-                  columnName: nameCol,
-                  rowsName: rs
-                })
-              }
-              else {
-                let dataElement = {}
-                dataElement[dimElementInside] = nameInsideElement
-                dataElement[dimColumn] = nameCol
-                dataElement[dimRow] = rs[0]
-
-                // Check if element already in singleElementsData
-                let stringSingElData = singleElementsData.map(el => JSON.stringify(el))
-                if (stringSingElData.indexOf(JSON.stringify(dataElement)) === -1) {
-                  singleElementsData.push(dataElement)
-                }
-              }
-              rs = [r[l]]
-              if (l === r.length - 1) {
-                let dataElement = {}
-                dataElement[dimElementInside] = nameInsideElement
-                dataElement[dimColumn] = nameCol
-                dataElement[dimRow] = rs[0]
-
-                // Check if element already in singleElementsData
-                let stringSingElData = singleElementsData.map(el => JSON.stringify(el))
-                if (stringSingElData.indexOf(JSON.stringify(dataElement)) === -1) {
-                  singleElementsData.push(dataElement)
-                }
-              }
-            }
-            else {
-              rs.push(r[l])
-              if (l === r.length - 1) {
-                verticalElementsData.push({
-                  nameInsideElement: nameInsideElement,
-                  columnName: nameCol,
-                  rowsName: rs
-                })
-              }
-            }
-          }
-        }
-        else {
-          // those element's columns and rows are not next to each other
-          // They will therefore be considered as two distinct elements
-          let dataElement = {}
-          dataElement[dimElementInside] = nameInsideElement
-          dataElement[dimColumn] = nameCol
-          dataElement[dimRow] = r[0]
-          singleElementsData.push(dataElement)
-        }
-      }
-    })
-  })
-
-  // Data multiple horizontal elements
-  horizontalElementsData = horizontalElementsData.filter((v, i, fullTable) => {
-    let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
-    return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
-  })
-  // Data multiple vertical elements
-  verticalElementsData = verticalElementsData.filter((v, i, fullTable) => {
-    let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
-    return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
-  })
+  let verticalElementsData = separatedData[0]
+  let horizontalElementsData = separatedData[1]
+  let singleElementsData = separatedData[2]
 
   console.log('horiz', horizontalElementsData)
   console.log('vert', verticalElementsData)
   console.log('single', singleElementsData)
 
   // Create position data for grid
-  let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, 150, 150)
+  let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, rawWidth / (columnsName.length + 1), rawHeight / (rowsName.length + 1))
   // Append names of row and columns in data
   gridData[0].forEach((col, indexCol) => col.name = colNamesPlusEmpty[indexCol]) // name columns
   for(let i=1; i<gridData.length; i++) { // name rows
@@ -461,8 +311,8 @@ function createGridChart(data, chartOptions) {
 
   let grid = d3.select('#grid')
     .append('svg')
-    .attr('width', '1000px')
-    .attr('height', '1200px')
+    .attr('width', rawWidth + 'px')
+    .attr('height', rawHeight + 'px')
 
   // Create g for each row
   let row = grid.selectAll(".Row")
@@ -539,42 +389,17 @@ function createGridChart(data, chartOptions) {
 
   /* Create superimposed svg elements */
   // Calculation of max horizontal elements in the same cell
-  let matrixVertEl = new Array(rowsName.length).fill().map(() => {
-    return new Array(columnsName.length)
-      .fill()
-      .map(() => [0])
-  })
-
-  verticalElementsData.forEach(el => {
-    el.rowsName.forEach(rowName => {
-      matrixVertEl[rowsName.indexOf(rowName)][columnsName.indexOf(el.columnName)] = parseInt(matrixVertEl[rowsName.indexOf(rowName)][columnsName.indexOf(el.columnName)]) + 1
-    })
-  })
-
-  let matrixHorizEl = new Array(rowsName.length).fill().map(() => {
-    return new Array(columnsName.length)
-      .fill()
-      .map(() => [0])
-  })
-
-  horizontalElementsData.forEach(el => {
-    el.columnsName.forEach(colName => {
-      matrixHorizEl[rowsName.indexOf(el.rowName)][columnsName.indexOf(colName)] = parseInt(matrixHorizEl[rowsName.indexOf(el.rowName)][columnsName.indexOf(colName)]) + 1
-    })
-  })
-
-  let maxCellHeight = Math.max(...matrixHorizEl.map(el => Math.max(...el))) + 1
-  let maxCellWidth = Math.max(...matrixVertEl.map(el => Math.max(...el))) + 1
+  let maxCellHeight = getMaxCellHeight (horizontalElementsData, rowsName, columnsName)
+  let maxCellWidth = getMaxCellWidth (verticalElementsData, rowsName, columnsName)
   let maxElementInCell = maxCellWidth * maxCellHeight
 
   console.log('maxCellWidth', maxCellWidth)
   console.log('maxVertElements', maxCellHeight)
 
   // Drawing of vertical elements and creating
-  draw(verticalElementsData)
-  draw(horizontalElementsData)
-
-  drawSingle(singleElementsData)
+  draw(verticalElementsData, 'multi')
+  draw(horizontalElementsData, 'multi')
+  draw(singleElementsData, 'single')
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -597,7 +422,7 @@ function createGridChart(data, chartOptions) {
           width: width,
           height: height
         })
-        // increment the x position. I.e. move it over by width (width variable)
+        // increment the x position. i.e. move it over by width (width variable)
         xpos += width;
       }
       // reset the x position after a row is complete
@@ -608,20 +433,210 @@ function createGridChart(data, chartOptions) {
     return data;
   }
 
-  function getCellMatrix (selection, id, horizElements, totalElements) {
-    let matrix = new Array(Math.trunc(totalElements/horizElements)).fill().map(el => [])
-    selection.select(id).selectAll('svg')
-      .each(function (svg, i) {
-        let selSvg = d3.select(this)
-        matrix[Math.trunc(i/horizElements)][i%horizElements] = selSvg
-      })
+  /* Calculate cell height depending on the maximum number of horizontal elements in a cell */
+  function getMaxCellHeight (horizontalElementsData, rowsName, columnsName) {
+      let matrixHorizEl = new Array(rowsName.length).fill().map(() => {
+      return new Array(columnsName.length)
+        .fill()
+        .map(() => [0])
+    })
 
-    return matrix
+    horizontalElementsData.forEach(el => {
+      el.columnsName.forEach(colName => {
+        matrixHorizEl[rowsName.indexOf(el.rowName)][columnsName.indexOf(colName)] = parseInt(matrixHorizEl[rowsName.indexOf(el.rowName)][columnsName.indexOf(colName)]) + 1
+      })
+    })
+
+    return Math.max(...matrixHorizEl.map(el => Math.max(...el))) + 1
+  }
+
+  /* Calculate cell width depending on the maximum number of vertical elements in a cell */
+  function getMaxCellWidth (verticalElementsData, rowsaName, columnsName) {
+    let matrixVertEl = new Array(rowsName.length).fill().map(() => {
+      return new Array(columnsName.length)
+        .fill()
+        .map(() => [0])
+    })
+
+    verticalElementsData.forEach(el => {
+      el.rowsName.forEach(rowName => {
+        matrixVertEl[rowsName.indexOf(rowName)][columnsName.indexOf(el.columnName)] = parseInt(matrixVertEl[rowsName.indexOf(rowName)][columnsName.indexOf(el.columnName)]) + 1
+      })
+    })
+
+    return Math.max(...matrixVertEl.map(el => Math.max(...el))) + 1
+  }
+
+  /* Returns an array of elements data [dataVerticalElements, dataHorizontalElements, dataSingleElements]
+  * dataElements : array of objects defining the position of elements
+   * Ex : [{"AppName": "App1", "Branch": "Finance", "CompanyBrand": "Brand1" }]
+   * with "Branch" being the column's name and "CompanyBrand" the row's one */
+  function createMultiSingleData (dataElements, nameDimRow, nameDimColumn, nameDimElementInside) {
+    // Create array of elements that are in multiple cell or column
+    let namesDataMultiple = dataElements.map(el => el[nameDimElementInside])
+      .filter((v, i, a) => !(a.indexOf(v) === i))
+      .filter((v, i, a) => a.indexOf(v) === i)
+
+    let horizontalElementsData = []
+    let verticalElementsData = []
+    let singleElementsData = dataElements.filter(el => namesDataMultiple.indexOf(el[nameDimElementInside]) === -1)
+
+    namesDataMultiple.forEach(nameInsideElement => {
+      let rowsData = []
+      let rows = []
+      data.filter(item => item[nameDimElementInside] === nameInsideElement)
+        .forEach(el => {
+          rows.push(el[nameDimRow])
+          rowsData.push(el)
+        })
+
+      uniqueRowsName = rows.filter((v, i, a) => a.indexOf(v) === i)
+        .sort((a, b) => {
+          return rowsName.indexOf(a) - rowsName.indexOf(b)
+        })
+
+      uniqueRowsName.forEach(rowName => {
+        let cols = []
+        rowsData.filter(data => data[nameDimRow] === rowName)
+          .forEach(el => {
+            cols.push(el[nameDimColumn])
+          })
+        let nameUniqueCols = cols.filter((v, i, a) => a.indexOf(v) === i)
+          .sort((a, b) => {
+            return columnsName.indexOf(a) - columnsName.indexOf(b)
+          })
+
+        if (nameUniqueCols.length > 1) {
+          let cs = [nameUniqueCols[0]]
+          for (let l=1; l<nameUniqueCols.length; l++) {
+            if (columnsName.indexOf(nameUniqueCols[l]) - columnsName.indexOf(nameUniqueCols[l - 1]) > 1) {
+              // columns not next to each other
+              if (cs.length > 1) {
+                // element is on multiple columns next to each other
+                horizontalElementsData.push({
+                  nameInsideElement: nameInsideElement,
+                  columnsName: cs,
+                  rowName: rowName
+                })
+              }
+              else {
+                let dataElement = {}
+                dataElement[nameDimElementInside] = nameInsideElement
+                dataElement[nameDimColumn] = cs[0]
+                dataElement[nameDimRow] = rowName
+                singleElementsData.push(dataElement)
+              }
+              cs = [nameUniqueCols[l]]
+              if (l === nameUniqueCols.length - 1) {
+                let dataElement = {}
+                dataElement[nameDimElementInside] = nameInsideElement
+                dataElement[nameDimColumn] = cs[0]
+                dataElement[nameDimRow] = rowName
+                singleElementsData.push(dataElement)
+              }
+            }
+            else {
+              cs.push(nameUniqueCols[l])
+              if (l === nameUniqueCols.length - 1) {
+                horizontalElementsData.push({
+                  nameInsideElement: nameInsideElement,
+                  columnsName: cs,
+                  rowName: rowName
+                })
+              }
+            }
+          }
+        }
+        else {
+          let r = []
+          let nameCol = nameUniqueCols[0]
+          r = rowsData.filter(el => el[nameDimColumn] === nameCol)
+            .map(el => el[nameDimRow])
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .sort((a, b) => {
+              return rowsName.indexOf(a) - rowsName.indexOf(b)
+            })
+
+          if (r.length > 1) {
+            let rs = [r[0]]
+            for (let l=1; l<r.length; l++) {
+              if (rowsName.indexOf(r[l]) - rowsName.indexOf(r[l - 1]) > 1) {
+                // rows not next to each other
+                if (rs.length > 1) {
+                  // element is on multiple rows next to each other
+                  verticalElementsData.push({
+                    nameInsideElement: nameInsideElement,
+                    columnName: nameCol,
+                    rowsName: rs
+                  })
+                }
+                else {
+                  let dataElement = {}
+                  dataElement[nameDimElementInside] = nameInsideElement
+                  dataElement[nameDimColumn] = nameCol
+                  dataElement[nameDimRow] = rs[0]
+
+                  // Check if element already in singleElementsData
+                  let stringSingElData = singleElementsData.map(el => JSON.stringify(el))
+                  if (stringSingElData.indexOf(JSON.stringify(dataElement)) === -1) {
+                    singleElementsData.push(dataElement)
+                  }
+                }
+                rs = [r[l]]
+                if (l === r.length - 1) {
+                  let dataElement = {}
+                  dataElement[nameDimElementInside] = nameInsideElement
+                  dataElement[nameDimColumn] = nameCol
+                  dataElement[nameDimRow] = rs[0]
+
+                  // Check if element already in singleElementsData
+                  let stringSingElData = singleElementsData.map(el => JSON.stringify(el))
+                  if (stringSingElData.indexOf(JSON.stringify(dataElement)) === -1) {
+                    singleElementsData.push(dataElement)
+                  }
+                }
+              }
+              else {
+                rs.push(r[l])
+                if (l === r.length - 1) {
+                  verticalElementsData.push({
+                    nameInsideElement: nameInsideElement,
+                    columnName: nameCol,
+                    rowsName: rs
+                  })
+                }
+              }
+            }
+          }
+          else {
+            // those element's columns and rows are not next to each other
+            // They will therefore be considered as two distinct elements
+            let dataElement = {}
+            dataElement[nameDimElementInside] = nameInsideElement
+            dataElement[nameDimColumn] = nameCol
+            dataElement[nameDimRow] = r[0]
+            singleElementsData.push(dataElement)
+          }
+        }
+      })
+    })
+
+    // Data multiple horizontal elements
+    horizontalElementsData = horizontalElementsData.filter((v, i, fullTable) => {
+      let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
+      return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
+    })
+    // Data multiple vertical elements
+    verticalElementsData = verticalElementsData.filter((v, i, fullTable) => {
+      let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
+      return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
+    })
+
+    return [verticalElementsData, horizontalElementsData, singleElementsData]
   }
 
   /* Create an array of objects, each one of them contains all the data necessary to define an element visually  */
   function createElementsPositionData (elementsData) {
-
     let dataElements = []
     let smallMove = 0
     let elementIsSingle
@@ -630,6 +645,7 @@ function createGridChart(data, chartOptions) {
       let elementIsVertical = (element.hasOwnProperty('rowsName'))
       elementIsSingle = (!element.hasOwnProperty('rowsName') && !element.hasOwnProperty('columnsName'))
 
+      // Select the cell where the element should have his first extremity
       let idCellBeginning = (elementIsSingle)?'#' + element[dimRow] + element[dimColumn]:
         (elementIsVertical)?
         '#' + element.rowsName[0] + element.columnName:
@@ -639,6 +655,7 @@ function createGridChart(data, chartOptions) {
       let xBeginning = cellBeginning.datum().x
       let yBeginning = cellBeginning.datum().y
 
+      // Select the cell where the element should have his end extremity
       let idCellEnd = (elementIsSingle)?'#' + element[dimRow] + element[dimColumn]:
         (elementIsVertical)?
         '#' + element.rowsName[element.rowsName.length - 1] + element.columnName:
@@ -650,22 +667,22 @@ function createGridChart(data, chartOptions) {
       let cellWidth = cellEnd.datum().width
       let cellHeight = cellEnd.datum().height
 
-      let radiusElement = (elementIsSingle)?20:0
+      let radiusElement = (elementIsSingle)?22:0
 
-      let xCenter = xBeginning + cellWidth / 2
-      let yCenter = yBeginning + cellHeight / 2
+      let xCellCenter = xBeginning + cellWidth / 2
+      let yCellCenter = yBeginning + cellHeight / 2
 
       let widthElement = (elementIsVertical)?
-        cellWidth / 3:
-        xEnd - xBeginning + cellWidth
+        cellWidth / 3 - 10:
+        xEnd - xBeginning + cellWidth - 20
 
       let heightElement = (elementIsVertical)?
-        yEnd - yBeginning + cellHeight:
-        cellHeight / 3
+        yEnd - yBeginning + cellHeight - 20:
+        cellHeight / 3 - 10
 
       dataElements.push({
-        idealX: (elementIsSingle)?xCenter:(elementIsVertical)?xBeginning + widthElement:xBeginning,
-        idealY: (elementIsSingle)?yCenter:(elementIsVertical)?yBeginning:yBeginning + heightElement,
+        idealX: (elementIsSingle)?xCellCenter:(elementIsVertical)?xBeginning + widthElement + 15:xBeginning + 10,
+        idealY: (elementIsSingle)?yCellCenter:(elementIsVertical)?yBeginning + 10:yBeginning + heightElement + 15,
         x: (elementIsVertical)?xBeginning + smallMove:xBeginning,
         y: (elementIsVertical)?yBeginning:yBeginning + smallMove,
         size: [widthElement, heightElement],
@@ -685,60 +702,97 @@ function createGridChart(data, chartOptions) {
     return dataElements
   }
 
-  /* Function to draw all elements on the graph */
-  function draw(elementsData) {
+  /* Function to draw all elements on the graph
+  * typeOfElement can be 'multi' for big rectangle elements or 'single' for unique cell elements
+   * that will be drawn as circles */
+  function draw(elementsData, typeOfElement) {
     let dataElements = createElementsPositionData(elementsData)
+    let bigElements = (typeOfElement === 'multi')
 
     let elementsSpace = grid.append('svg')
       .attr('class', 'superimposedElementsSpace')
 
-    dataElements.forEach(rectangle => {
-      let elementSelection = elementsSpace.append('g')
-        .attr('class', 'element')
+    let dragCircle = d3.drag()
+      .on("start", dragstarted)
+      .on("drag", circleDragged)
+      .on("end", dragended)
 
-      elementSelection.append('rect')
-        .attr('x', rectangle.x)
-        .attr('y', rectangle.y)
-        .attr('width', rectangle.size[0])
-        .attr('height', rectangle.size[1])
-        .style('fill', rectangle.colorElement)
-        .attr('class', rectangle.nameInsideElement)
+    let dragRectangle = d3.drag()
+      .on("start", dragstarted)
+      .on("drag", rectangleDragged)
+      .on("end", dragended)
+
+    dataElements.forEach(dataElement => {
+      dataElement.xCenter = dataElement.x + dataElement.size[0] / 2
+      dataElement.yCenter = dataElement.y + dataElement.size[1] / 2
+
+      let elementSelection = elementsSpace.selectAll('#' + dataElement.nameInsideElement)
+        .data([dataElement])
+        .enter()
+        .append('g')
+        .attr('class', 'element')
+        .attr('id', element => element.nameInsideElement)
+
+      elementSelection.append((bigElements)?'rect':'circle')
+        .attr((bigElements)?'x':'cx', element => element.x)
+        .attr((bigElements)?'y':'cy', element => element.y)
+        .style('fill', element => element.colorElement)
+        .attr('class', element => element.nameInsideElement)
         .style('stroke', 'black')
+        .call((bigElements)?dragRectangle:dragCircle)
 
       elementSelection.append('text')
-        .attr('x', rectangle.x + rectangle.size[0] / 2)
-        .attr('y', rectangle.y + rectangle.size[1] / 2)
         .attr('dy', '.3em')
-        .text(rectangle.nameInsideElement)
+        .text(element => element.nameInsideElement)
         .attr('text-anchor', 'middle')
 
+      if (bigElements) {
+        elementSelection.select('rect')
+          .attr('width', element => element.size[0])
+          .attr('height', element => element.size[1])
+
+        elementSelection.select('text')
+          .attr('x', element => element.xCenter)
+          .attr('y', element => element.yCenter)
+      }
+
+      else {
+        elementSelection.select('circle')
+          .attr('r', element => element.radius)
+
+        elementSelection.select('text')
+          .attr('x', element => element.x )
+          .attr('y', element => element.y )
+      }
     })
   }
 
-  /* Draw single elements as circles on the graph */
-  function drawSingle (dataElementsSingle) {
-    let data = createElementsPositionData(dataElementsSingle)
+  function dragstarted(d) {
+    d3.select(this.parentNode).raise().classed("active", true);
+  }
 
-    let elementsSpace = grid.append('svg')
-      .attr('class', 'superimposedSingleElementsSpace')
+  function rectangleDragged (d) {
+    d3.select(this.parentNode).select('rect')
+      .attr("x", d.x = d3.event.x)
+      .attr("y", d.y = d3.event.y)
 
-    data.forEach(singleElement => {
-      let elementSelection = elementsSpace.append('g')
-        .attr('class', 'element')
+    d3.select(this.parentNode).select('text')
+      .attr("x", d.xCenter = d3.event.x + d.size[0] / 2)
+      .attr("y", d.yCenter = d3.event.y + d.size[1] / 2)
+  }
 
-      elementSelection.append('circle')
-        .attr('cx', singleElement.x)
-        .attr('cy', singleElement.y)
-        .attr('r', singleElement.radius)
-        .attr('fill', singleElement.colorElement)
+  function circleDragged(d) {
+    d3.select(this.parentNode).select('circle')
+      .attr("cx", d.x = d3.event.x)
+      .attr("cy", d.y = d3.event.y)
 
-      elementSelection.append('text')
-        .attr('x', singleElement.x )
-        .attr('y', singleElement.y )
-        .attr('dy', '.3em')
-        .text(singleElement.nameInsideElement)
-        .attr('text-anchor', 'middle')
-    })
+    d3.select(this.parentNode).select('text')
+      .attr("x", d.x = d3.event.x)
+      .attr("y", d.y = d3.event.y)
+  }
+
+  function dragended(d) {
+    d3.select(this.parentNode).classed("active", false);
   }
 
   /* Creates force simulation to avoid overlapping of elements
