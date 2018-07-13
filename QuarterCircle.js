@@ -1,7 +1,5 @@
-// TODO: avoid text overlapping (see https://stackoverflow.com/questions/17425268/d3js-automatic-labels-placement-to-avoid-overlaps-force-repulsion)
-// TODO: place strong/weak on axis
-// TODO: color of circles
-// TODO: rawGraphs
+/* Author : Yazid Smahi
+ * Definition of Quarter Circle Graph */
 
 let dataTest = [
   {
@@ -12,6 +10,12 @@ let dataTest = [
   },
   {
     "CompanyName": "Company 11111111111",
+    "Strategy": "0.4",
+    "CurrentOffering": "0.6",
+    "MarketPresence": 1
+  },
+  {
+    "CompanyName": "Company Uno",
     "Strategy": "0.4",
     "CurrentOffering": "0.6",
     "MarketPresence": 1
@@ -115,10 +119,10 @@ let dataTest = [
 ]
 
   function createQuarterCircleGraph (data) {
-    let dimNameElement = "CompanyName"
+    let dimNameElements = "CompanyName"
     let dimX = "Strategy"
     let dimY = "CurrentOffering"
-    let dimSizeElement = "MarketPresence"
+    let dimSizeElements = "MarketPresence"
     let dimColorElements = "MarketPresence"
     let colorGood = {red: 0, green: 255, blue: 0}
     let colorBad = {red: 255, green: 0, blue: 0}
@@ -183,13 +187,7 @@ let dataTest = [
       .attr('x', d => d.x0 + d.width / 2)
       .attr('y', d => d.y0 + d.height / 5)
       .attr('dy', '.75em')
-      .html(() => {
-        let html = ''
-        dimX.replace(/([a-z](?=[A-Z]))/g, '$1 \n').split('\n').forEach(string => {
-          html += '<br>' + string + '</br>'
-        })
-        return html
-      })
+      .html(dimX.replace(/([a-z](?=[A-Z]))/g, '$1 \n'))
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'middle')
 
@@ -287,7 +285,7 @@ let dataTest = [
     })
 
     /* Append size scale */
-    if (dimSizeElement) {
+    if (dimSizeElements) {
       let sizeScaleSpace = arcsSpace.selectAll('.sizeScaleSpace')
         .data([{x: graphHeight / 16,
           y: graphHeight - 3/2 * borderGraph,
@@ -337,7 +335,7 @@ let dataTest = [
         .style('stroke', 'black')
 
       sizeScaleSpace.append('text')
-        .text(dimSizeElement)
+        .text(dimSizeElements)
         .attr('x', d => d.x + (currentX - d.x) / 2)
         .attr('y', d => d.y)
         .attr('dy', '.75em')
@@ -357,12 +355,10 @@ let dataTest = [
       let nodeX = xScale(parseFloat(node[dimX]))
       let nodeY = yScale(parseFloat(node[dimY]))
       return {
-        //radius: 0,
-        //color: '#ff7f0e',
         x: nodeX,
         y: nodeY,
-        nameElement: node[dimNameElement],
-        sizeElement: (dimSizeElement)?parseFloat(node[dimSizeElement]):0.5,
+        nameElement: node[dimNameElements],
+        sizeElement: (dimSizeElements)?parseFloat(node[dimSizeElements]):0.5,
         colorElement: (dimColorElements)?pickHex(node[dimColorElements], colorGood, colorBad):'grey'
       };
     });
@@ -371,13 +367,18 @@ let dataTest = [
     let simulation = d3.forceSimulation(nodesElements)
       .force("x", d3.forceX(function(d) { return d.x }))
       .force("y", d3.forceY(function(d) { return d.y }))
-      .force("collide", d3.forceCollide().radius((d) => (d.sizeElement + 0.01) * radiusCircleElement))
-      .force("manyBody", d3.forceManyBody().strength(-10))
+      .force("collide", d3.forceCollide().radius((d) => (d.sizeElement + 0.1) * radiusCircleElement))
+      //.force("manyBody", d3.forceManyBody().strength(-10))
       .stop();
 
     for (var i = 0; i < 200; ++i) simulation.tick()
 
-    /* Draw dataset elements to the graph on the arcs */
+    /* Draw dataset elements to the graph on the arcs and make them draggable*/
+    let drag = d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended)
+
     let elementSpace = arcsSpace.selectAll('.elementSpace')
       .data(nodesElements)
       .enter().append('g')
@@ -388,16 +389,34 @@ let dataTest = [
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
       .style("fill", d => d.colorElement)
+      .call(drag)
+
+    function dragstarted(d) {
+      d3.select(this).raise().classed("active", true);
+    }
+
+    function dragged(d) {
+      d3.select(this)
+        .attr("cx", d.x = d3.event.x)
+        .attr("cy", d.y = d3.event.y)
+        .attr("x", d.x = d3.event.x)
+        .attr("y", d.y = d3.event.y)
+    }
+
+    function dragended(d) {
+      d3.select(this).classed("active", false);
+    }
 
     elementSpace.append('text')
       .text(el => el.nameElement)
-      .attr('x', el => el.x + (el.sizeElement + 0.1) * radiusCircleElement)
+      .attr('x', el => el.x + (el.sizeElement + 0.3) * radiusCircleElement)
       .attr('y', el => el.y)
-      .attr('dy', '.75em')
+      .attr('dy', '.1em')
       .attr('text-anchor', 'left')
-      .attr('alignment-baseline', 'bottom')
+      .attr('alignment-baseline', 'middle')
       .attr('class', 'labelCircle')
       .attr('transform', 'translate(0, 0)')
+      .call(drag)
 
     // Avoid label overlaping
     arrangeLabels('.labelCircle')
