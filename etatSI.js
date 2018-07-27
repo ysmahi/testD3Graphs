@@ -1,249 +1,279 @@
 let dataTest = [
   {
-    "codeSA": "codeSA1",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand1"
+    "SA": "BD",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA1",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand2"
+    "SA": "BD",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA1",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand3"
-  },
-
-  {
-    "codeSA": "codeSA78",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand1"
+    "SA": "BD",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "AEL"
   },
   {
-    "codeSA": "codeSA78",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand2"
+    "SA": "BD",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "AEC-Pat"
   },
   {
-    "codeSA": "codeSA1",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand2"
+    "SA": "BD",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA2",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand1"
+    "SA": "BD",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA2",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand2"
+    "SA": "BD",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA2",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand4"
+    "SA": "BD",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA2",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand5"
+    "SA": "BD",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "AEL"
   },
   {
-    "codeSA": "codeSA6",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand3"
+    "SA": "BD",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "AEC-Pat"
   },
   {
-    "codeSA": "codeSA30",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand1"
+    "SA": "BD",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA3",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand3"
+    "SA": "BD",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA30",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand2"
+    "SA": "EP",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution frontend integration",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA30",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand3"
+    "SA": "EP",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution frontend integration",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA30",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand4"
+    "SA": "EP",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution frontend integration",
+    "Réseau": "AEL"
   },
   {
-    "codeSA": "codeSA3",
-    "Branch": "HR",
-    "CompanyBrand": "Brand3"
-  },  {
-    "codeSA": "codeSA3",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand3"
+    "SA": "EP",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution frontend integration",
+    "Réseau": "AEC-Pat"
   },
   {
-    "codeSA": "codeSA4",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand4"
+    "SA": "EP",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution frontend integration",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA4",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand5"
+    "SA": "EP",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution frontend integration",
+    "Réseau": "GMPA"
   },
   {
-    "codeSA": "codeSA62",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand4"
+    "SA": "C5",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distribution partners/ intermediary management",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA62",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand5"
+    "SA": "C5",
+    "Sous-domaines": "Performance Management",
+    "Capacités": "Sales target and performance management",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA112",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand4"
+    "SA": "C5",
+    "Sous-domaines": "Distribution Management",
+    "Capacités": "Distributer termination",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA112",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand5"
+    "SA": "CR",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA5",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand5"
+    "SA": "CR",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA6",
-    "Branch": "HR",
-    "CompanyBrand": "Brand3"
+    "SA": "CR",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA7",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand1"
+    "SA": "CR",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA8",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand2"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA8",
-    "Branch": "HR",
-    "CompanyBrand": "Brand2"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA9",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand3"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEL"
   },
   {
-    "codeSA": "codeSA10",
-    "Branch": "HR",
-    "CompanyBrand": "Brand4"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-Pat"
   },
   {
-    "codeSA": "codeSA10",
-    "Branch": "HR",
-    "CompanyBrand": "Brand1"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA10",
-    "Branch": "HR",
-    "CompanyBrand": "Brand2"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Courtiers"
   },
   {
-    "codeSA": "codeSA10",
-    "Branch": "HR",
-    "CompanyBrand": "Brand1"
+    "SA": "CV",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "GMPA"
   },
   {
-    "codeSA": "codeSA10",
-    "Branch": "HR",
-    "CompanyBrand": "Brand2"
+    "SA": "FP",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA10",
-    "Branch": "HR",
-    "CompanyBrand": "Brand6"
+    "SA": "FP",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA10b",
-    "Branch": "HR",
-    "CompanyBrand": "Brand1"
+    "SA": "FP",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEL"
   },
   {
-    "codeSA": "codeSA10b",
-    "Branch": "HR",
-    "CompanyBrand": "Brand2"
+    "SA": "FP",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-Pat"
   },
   {
-    "codeSA": "codeSA11",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand5"
+    "SA": "FP",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA42",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand5"
-  },  {
-    "codeSA": "codeSA43",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand5"
-  },  {
-    "codeSA": "codeSA44",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand5"
-  },  {
-    "codeSA": "codeSA45",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand5"
-  },{
-    "codeSA": "codeSA47",
-    "Branch": "Tech",
-    "CompanyBrand": "Brand5"
+    "SA": "FP",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "GMPA"
   },
   {
-    "codeSA": "codeSA12",
-    "Branch": "Sales",
-    "CompanyBrand": "Brand6"
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Agents"
   },
   {
-    "codeSA": "codeSA13",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand1"
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Point Service"
   },
   {
-    "codeSA": "codeSA14",
-    "Branch": "HR",
-    "CompanyBrand": "Brand2"
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEL"
   },
   {
-    "codeSA": "codeSA15",
-    "Branch": "HR",
-    "CompanyBrand": "Brand2"
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-Pat"
   },
   {
-    "codeSA": "codeSA16",
-    "Branch": "HR",
-    "CompanyBrand": "Brand6"
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "AEC-PS"
   },
   {
-    "codeSA": "codeSA16",
-    "Branch": "Finance",
-    "CompanyBrand": "Brand6"
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Courtiers"
+  },
+  {
+    "SA": "GH",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "GMPA"
+  },
+  {
+    "SA": "JB",
+    "Sous-domaines": "Distribution Accounting",
+    "Capacités": "Distributor receivables management",
+    "Réseau": "Courtiers"
   }
 ]
 
@@ -251,13 +281,13 @@ let chartOptions = {
 }
 
 function getLowerLeftEmptyCell (selectionCellMatrix) {
-  
+
 }
 
 function createGridChart(data, chartOptions) {
-  let dimColumn = 'Branch'
-  let dimRow = 'CompanyBrand'
-  let dimElementInside = 'codeSA'
+  let dimColumn = 'Sous-domaines'
+  let dimRow = 'Réseau'
+  let dimElementInside = 'SA'
   let rawWidth = 900
   let rawHeight = 1000
 
@@ -307,86 +337,7 @@ function createGridChart(data, chartOptions) {
   console.log('gridData', gridData)
 
   /* Creation of the underneath grid */
-  divGridGraph.append('div')
-    .attr('id', 'grid')
-
-  let grid = d3.select('#grid')
-    .append('svg')
-    .attr('width', rawWidth + 'px')
-    .attr('height', rawHeight + 'px')
-
-  // Create g for each row
-  let row = grid.selectAll(".Row")
-    .data(gridData)
-    .enter()
-    .append("g")
-    .attr("class", "Row");
-
-  // Create all cells
-  let cell = row.selectAll(".Cell")
-    .data(function(row) { return row; })
-    .enter()
-    .append('g')
-    .attr('class', 'Cell')
-    .attr('id', cell =>{
-      let cellIsAnInsideCell = (cell.rowName && cell.columnName)
-
-      if (cellIsAnInsideCell) return '' + cell.rowName + cell.columnName
-      else return;
-    })
-
-  // Create rectangles for cells
-  let rowIndex = 0
-  cell.append("rect")
-    .attr("class", (rect, i) => {
-      let cellClass = 'insideTableRect'
-      if (i%(columnsName.length + 1) === 0) {
-        // Cell is row name
-        cellClass = 'rowNameRect'
-      }
-      if (rowIndex === 0) {
-        // Cell is column name
-        cellClass = (i === 0)?'firstRect':'columnNameRect'
-        rowIndex = (i === columnsName.length)?(rowIndex + 1):rowIndex
-      }
-
-      return cellClass
-    })
-    .attr("x", function(d) { return d.x; })
-    .attr("y", function(d) { return d.y; })
-    .attr("width", function(d) { return d.width; })
-    .attr("height", function(d) { return d.height; })
-
-  // Adjust style of table
-  d3.selectAll('.rowNameRect')
-    .style('fill', '#668cff')
-    .style('stroke', "#ffffff")
-
-  d3.selectAll('.columnNameRect')
-    .style('fill', '#668cff')
-    .style('stroke', "#ffffff")
-
-  d3.selectAll('.insideTableRect')
-    .style('fill', '#d9d9d9')
-    .style('stroke', "#ffffff")
-
-  d3.selectAll('.firstRect')
-    .style('opacity', '0')
-    .style('filter', 'alpha(opacity=0)')
-
-  // Append name of rows and columns
-  cell.append('text')
-    .attr('x', cell => cell.x + cell.width/2)
-    .attr('y', cell => cell.y + cell.height/2)
-    .attr("dy", ".35em")
-    .attr('text-anchor', 'middle')
-    .attr('alignment-baseline', 'central')
-    .style('font-weight', 'bold')
-    .text(cell => {
-      if (cell.hasOwnProperty('name')) {
-        return cell.name
-      }
-    })
+  drawGrid(divGridGraph, gridData)
 
   /* Create superimposed svg elements */
   // Calculation of max horizontal elements in the same cell
@@ -398,9 +349,10 @@ function createGridChart(data, chartOptions) {
   console.log('maxVertElements', maxVerticalElements)
 
   // Drawing of vertical elements and creating
-  draw(verticalElementsData, 'multi')
-  draw(horizontalElementsData, 'multi')
-  draw(singleElementsData, 'single')
+  let insideTableSel = d3.select('#insideTable')
+  draw(verticalElementsData, insideTableSel, 'multi')
+  draw(horizontalElementsData, insideTableSel, 'multi')
+  draw(singleElementsData, insideTableSel, 'single')
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -434,9 +386,93 @@ function createGridChart(data, chartOptions) {
     return data;
   }
 
+  function drawGrid (parentSelection, gridData) {
+    parentSelection.append('div')
+      .attr('id', 'grid')
+
+    let grid = d3.select('#grid')
+      .append('svg')
+      .attr('width', rawWidth + 'px')
+      .attr('height', rawHeight + 'px')
+      .attr('id', 'insideTable')
+
+    // Create g for each row
+    let row = grid.selectAll(".Row")
+      .data(gridData)
+      .enter()
+      .append("g")
+      .attr("class", "Row");
+
+    // Create all cells
+    let cell = row.selectAll(".Cell")
+      .data(function(row) { return row; })
+      .enter()
+      .append('g')
+      .attr('class', 'Cell')
+      .attr('id', cell =>{
+        let cellIsAnInsideCell = (cell.rowName && cell.columnName)
+
+        if (cellIsAnInsideCell) return 'rect' + rowsName.indexOf(cell.rowName) + '' + columnsName.indexOf(cell.columnName)
+        else return;
+      })
+
+    // Create rectangles for cells
+    let rowIndex = 0
+    cell.append("rect")
+      .attr("class", (rect, i) => {
+        let cellClass = 'insideTableRect'
+        if (i%(columnsName.length + 1) === 0) {
+          // Cell is row name
+          cellClass = 'rowNameRect'
+        }
+        if (rowIndex === 0) {
+          // Cell is column name
+          cellClass = (i === 0)?'firstRect':'columnNameRect'
+          rowIndex = (i === columnsName.length)?(rowIndex + 1):rowIndex
+        }
+
+        return cellClass
+      })
+      .attr("x", function(d) { return d.x; })
+      .attr("y", function(d) { return d.y; })
+      .attr("width", function(d) { return d.width; })
+      .attr("height", function(d) { return d.height; })
+
+    // Adjust style of table
+    d3.selectAll('.rowNameRect')
+      .style('fill', '#668cff')
+      .style('stroke', "#ffffff")
+
+    d3.selectAll('.columnNameRect')
+      .style('fill', '#668cff')
+      .style('stroke', "#ffffff")
+
+    d3.selectAll('.insideTableRect')
+      .style('fill', '#d9d9d9')
+      .style('stroke', "#ffffff")
+
+    d3.selectAll('.firstRect')
+      .style('opacity', '0')
+      .style('filter', 'alpha(opacity=0)')
+
+    // Append name of rows and columns
+    cell.append('text')
+      .attr('x', cell => cell.x + cell.width/2)
+      .attr('y', cell => cell.y + cell.height/2)
+      .attr("dy", ".35em")
+      .attr('text-anchor', 'middle')
+      .attr('alignment-baseline', 'central')
+      .style('font-weight', 'bold')
+      .text(cell => {
+        if (cell.hasOwnProperty('name')) {
+          return cell.name
+        }
+      })
+  }
+
   /* Calculate cell height depending on the maximum number of horizontal elements in a cell */
   function getMaxHorizontalElements (horizontalElementsData, rowsName, columnsName) {
-      let matrixHorizEl = new Array(rowsName.length).fill().map(() => {
+    let matrixHorizEl = new Array(rowsName.length).fill().map(() => {
       return new Array(columnsName.length)
         .fill()
         .map(() => [0])
@@ -647,26 +683,28 @@ function createGridChart(data, chartOptions) {
       elementIsSingle = (!element.hasOwnProperty('rowsName') && !element.hasOwnProperty('columnsName'))
 
       // Select the cell where the element should have his first extremity
-      let idCellBeginning = (elementIsSingle)?'#' + element[dimRow] + element[dimColumn]:
+      let idCellBeginning = (elementIsSingle)?
+        '#rect' + rowsName.indexOf(element[dimRow]) + columnsName.indexOf(element[dimColumn]):
         (elementIsVertical)?
-        '#' + element.rowsName[0] + element.columnName:
-        '#' + element.rowName + element.columnsName[0]
+          '#rect' + rowsName.indexOf(element.rowsName[0]) + '' + columnsName.indexOf(element.columnName):
+          '#rect' + rowsName.indexOf(element.rowName) +  '' + columnsName.indexOf(element.columnsName[0])
 
-      let cellBeginning = grid.select(idCellBeginning)
-      let xBeginning = cellBeginning.datum().x
-      let yBeginning = cellBeginning.datum().y
+      let cellBeginning = getSelectionCellData(idCellBeginning)
+      let xBeginning = cellBeginning.x
+      let yBeginning = cellBeginning.y
 
       // Select the cell where the element should have his end extremity
-      let idCellEnd = (elementIsSingle)?'#' + element[dimRow] + element[dimColumn]:
+      let idCellEnd = (elementIsSingle)?
+        '#rect' + rowsName.indexOf(element[dimRow]) + columnsName.indexOf(element[dimColumn]):
         (elementIsVertical)?
-        '#' + element.rowsName[element.rowsName.length - 1] + element.columnName:
-        '#' + element.rowName + element.columnsName[element.columnsName.length - 1]
+          '#rect' + rowsName.indexOf(element.rowsName[element.rowsName.length - 1]) + '' +  columnsName.indexOf(element.columnName):
+          '#rect' + rowsName.indexOf(element.rowName) + '' + columnsName.indexOf(element.columnsName[element.columnsName.length - 1])
 
-      let cellEnd = grid.select(idCellEnd)
-      let xEnd = cellEnd.datum().x
-      let yEnd = cellEnd.datum().y
-      let cellWidth = cellEnd.datum().width
-      let cellHeight = cellEnd.datum().height
+      let cellEnd = getSelectionCellData(idCellEnd)
+      let xEnd = cellEnd.x
+      let yEnd = cellEnd.y
+      let cellWidth = cellEnd.width
+      let cellHeight = cellEnd.height
 
       let radiusElement = (elementIsSingle)?22:0
 
@@ -706,11 +744,11 @@ function createGridChart(data, chartOptions) {
   /* Function to draw all elements on the graph
   * typeOfElement can be 'multi' for big rectangle elements or 'single' for unique cell elements
    * that will be drawn as circles */
-  function draw(elementsData, typeOfElement) {
+  function draw(elementsData, insideTableSelection, typeOfElement) {
     let dataElements = createElementsPositionData(elementsData)
     let bigElements = (typeOfElement === 'multi')
 
-    let elementsSpace = grid.append('svg')
+    let elementsSpace = insideTableSelection.append('svg')
       .attr('class', 'superimposedElementsSpace')
 
     let dragCircle = d3.drag()
@@ -964,6 +1002,10 @@ function createGridChart(data, chartOptions) {
 
   function constant(_) {
     return function () { return _ }
+  }
+
+  function getSelectionCellData (idCell) {
+    return d3.selectAll('#grid').select(idCell).datum()
   }
 }
 
