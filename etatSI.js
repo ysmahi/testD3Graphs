@@ -289,7 +289,7 @@ function createGridChart(data, chartOptions) {
   let dimRow = 'Réseau'
   let dimElementInside = 'SA'
   let rawWidth = 900
-  let rawHeight = 1000
+  let rawHeight = 600
 
   let divGridGraph = d3.select('body').append('div')
     .attr('class', 'gridGraph')
@@ -311,12 +311,37 @@ function createGridChart(data, chartOptions) {
   let horizontalElementsData = separatedData[1]
   let singleElementsData = separatedData[2]
 
+  verticalElementsData.push(...singleElementsData.map(el => {
+    let rowsSingleElement = []
+    rowsSingleElement.push(el[dimRow])
+    return {
+      nameInsideElement: el[dimElementInside],
+      columnName: el[dimColumn],
+      rowsName: rowsSingleElement
+    }
+  }))
+  // TODO : dessiner des rectangles pour les single elements et non des cercles
+
   console.log('horiz', horizontalElementsData)
   console.log('vert', verticalElementsData)
   console.log('single', singleElementsData)
 
+  // Calculation of max horizontal elements in the same cell
+  let maxHorizontalElements = getMaxHorizontalElements (horizontalElementsData, rowsName, columnsName)
+  let maxVerticalElements = getMaxVerticalElements (verticalElementsData, rowsName, columnsName)
+  let maxElementInCell = maxVerticalElements * maxHorizontalElements
+
+  // Cell and element width
+  let cellWidth = rawWidth / (columnsName.length + 1)
+  let cellHeight = rawWidth / (rowsName.length + 1)
+  let verticalElementsWidth = cellWidth / (maxVerticalElements + 1)
+  let horizontalElementsHeight = cellHeight / (maxHorizontalElements + 1)
+
+  console.log('maxHorizElements', maxHorizontalElements)
+  console.log('maxVertElements', maxVerticalElements)
+
   // Create position data for grid
-  let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, rawWidth / (columnsName.length + 1), rawHeight / (rowsName.length + 1))
+  let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, cellWidth, rawHeight / (rowsName.length + 1))
   // Append
   // names of row and columns in data
   gridData[0].forEach((col, indexCol) => col.name = colNamesPlusEmpty[indexCol]) // name columns
@@ -340,19 +365,11 @@ function createGridChart(data, chartOptions) {
   drawGrid(divGridGraph, gridData)
 
   /* Create superimposed svg elements */
-  // Calculation of max horizontal elements in the same cell
-  let maxHorizontalElements = getMaxHorizontalElements (horizontalElementsData, rowsName, columnsName)
-  let maxVerticalElements = getMaxVerticalElements (verticalElementsData, rowsName, columnsName)
-  let maxElementInCell = maxVerticalElements * maxHorizontalElements
-
-  console.log('maxHorizElements', maxHorizontalElements)
-  console.log('maxVertElements', maxVerticalElements)
-
-  // Drawing of vertical elements and creating
+  // Drawing of vertical and horizontal elements
   let insideTableSel = d3.select('#insideTable')
-  draw(verticalElementsData, insideTableSel, 'multi')
-  draw(horizontalElementsData, insideTableSel, 'multi')
-  draw(singleElementsData, insideTableSel, 'single')
+  draw(verticalElementsData, insideTableSel, 'multi', verticalElementsWidth)
+  draw(horizontalElementsData, insideTableSel, 'multi', horizontalElementsHeight)
+  //draw(singleElementsData, insideTableSel, 'single')
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -440,16 +457,29 @@ function createGridChart(data, chartOptions) {
 
     // Adjust style of table
     d3.selectAll('.rowNameRect')
-      .style('fill', '#668cff')
+      .style('fill', '#b4b4b4')
       .style('stroke', "#ffffff")
+      .style('stroke-width', '2px')
+      .attr("x", function(d) { return d.x + 5 })
+      .attr("y", function(d) { return d.y + 5})
+      .attr("width", function(d) { return d.width - 10 })
+      .attr("height", function(d) { return d.height - 10 })
 
     d3.selectAll('.columnNameRect')
-      .style('fill', '#668cff')
+      .style('fill', '#8fa9f1')
       .style('stroke', "#ffffff")
+      .style('stroke-width', '2px')
+      .style('stroke-dasharray', rect => {
+        return '0, ' + rect.width + ', ' +  rect.height + ', '  + rect.width + ', ' + rect.height
+      })
 
     d3.selectAll('.insideTableRect')
-      .style('fill', '#d9d9d9')
+      .style('fill', '#8fa9f1')
       .style('stroke', "#ffffff")
+      .style('stroke-width', '2px')
+      .style('stroke-dasharray', rect => {
+        return '0, ' + rect.width + ', ' +  rect.height + ', '  + rect.width + ', ' + rect.height
+      })
 
     d3.selectAll('.firstRect')
       .style('opacity', '0')
@@ -462,12 +492,15 @@ function createGridChart(data, chartOptions) {
       .attr("dy", ".35em")
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'central')
-      .style('font-weight', 'bold')
       .text(cell => {
         if (cell.hasOwnProperty('name')) {
           return cell.name
         }
       })
+      .style('font-weight', 'bold')
+      .style('fill', '#ffffff')
+      .style('font-size', '13px')
+      .style('font-family', 'Arial')
   }
 
   /* Calculate cell height depending on the maximum number of horizontal elements in a cell */
@@ -673,7 +706,7 @@ function createGridChart(data, chartOptions) {
   }
 
   /* Create an array of objects, each one of them contains all the data necessary to define an element visually  */
-  function createElementsPositionData (elementsData) {
+  function createElementsPositionData (elementsData, elementDimension) {
     let dataElements = []
     let smallMove = 0
     let elementIsSingle
@@ -712,12 +745,12 @@ function createGridChart(data, chartOptions) {
       let yCellCenter = yBeginning + cellHeight / 2
 
       let widthElement = (elementIsVertical)?
-        cellWidth / 3 - 10:
+        elementDimension:
         xEnd - xBeginning + cellWidth - 20
 
       let heightElement = (elementIsVertical)?
         yEnd - yBeginning + cellHeight - 20:
-        cellHeight / 3 - 10
+        elementDimension
 
       dataElements.push({
         idealX: (elementIsSingle)?xCellCenter:(elementIsVertical)?xBeginning + widthElement + 15:xBeginning + 10,
@@ -727,7 +760,7 @@ function createGridChart(data, chartOptions) {
         size: [widthElement, heightElement],
         radius: radiusElement,
         nameInsideElement: (elementIsSingle)?element[dimElementInside]:element.nameInsideElement,
-        colorElement: (elementIsSingle)?'skyblue':(elementIsVertical)?'red':'green'
+        colorElement: '#426bb0'
       })
 
       // smallMove is used so that no elements are exactly at the same position so that tick() works
@@ -744,8 +777,8 @@ function createGridChart(data, chartOptions) {
   /* Function to draw all elements on the graph
   * typeOfElement can be 'multi' for big rectangle elements or 'single' for unique cell elements
    * that will be drawn as circles */
-  function draw(elementsData, insideTableSelection, typeOfElement) {
-    let dataElements = createElementsPositionData(elementsData)
+  function draw(elementsData, insideTableSelection, typeOfElement, elementDimension) {
+    let dataElements = createElementsPositionData(elementsData, elementDimension)
     let bigElements = (typeOfElement === 'multi')
 
     let elementsSpace = insideTableSelection.append('svg')
@@ -777,7 +810,7 @@ function createGridChart(data, chartOptions) {
         .attr((bigElements)?'y':'cy', element => element.y)
         .style('fill', element => element.colorElement)
         .attr('class', element => element.nameInsideElement)
-        .style('stroke', 'black')
+        .style('stroke', '#ffffff')
         .call((bigElements)?dragRectangle:dragCircle)
 
       elementSelection.append('text')
@@ -793,6 +826,10 @@ function createGridChart(data, chartOptions) {
         elementSelection.select('text')
           .attr('x', element => element.xCenter)
           .attr('y', element => element.yCenter)
+          .style('fill', '#ffffff')
+          .style('font-family', 'Arial')
+          .style('font-size', '10px')
+          .style('font-weight', 'bold')
       }
 
       else {
