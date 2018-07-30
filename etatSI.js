@@ -336,6 +336,7 @@ function createGridChart(data, chartOptions) {
   let cellHeight = rawWidth / (rowsName.length + 1)
   let verticalElementsWidth = cellWidth / (maxVerticalElements + 1)
   let horizontalElementsHeight = cellHeight / (maxHorizontalElements + 1)
+  let marginVerticalElements = (cellWidth - maxVerticalElements * verticalElementsWidth) / (1 + maxVerticalElements)
 
   console.log('maxHorizElements', maxHorizontalElements)
   console.log('maxVertElements', maxVerticalElements)
@@ -708,7 +709,7 @@ function createGridChart(data, chartOptions) {
   /* Create an array of objects, each one of them contains all the data necessary to define an element visually  */
   function createElementsPositionData (elementsData, elementDimension) {
     let dataElements = []
-    let smallMove = 0
+    let dataElement = {}
     let elementIsSingle
 
     elementsData.forEach(element => {
@@ -752,19 +753,28 @@ function createGridChart(data, chartOptions) {
         yEnd - yBeginning + cellHeight - 20:
         elementDimension
 
-      dataElements.push({
+      dataElement = {
         idealX: (elementIsSingle)?xCellCenter:(elementIsVertical)?xBeginning + widthElement + 15:xBeginning + 10,
         idealY: (elementIsSingle)?yCellCenter:(elementIsVertical)?yBeginning + 10:yBeginning + heightElement + 15,
-        x: (elementIsVertical)?xBeginning + smallMove:xBeginning,
-        y: (elementIsVertical)?yBeginning:yBeginning + smallMove,
+        x: (elementIsVertical)?xBeginning + marginVerticalElements:xBeginning + marginVerticalElements,
+        y: (elementIsVertical)?yBeginning + 5:yBeginning + 5,
         size: [widthElement, heightElement],
         radius: radiusElement,
         nameInsideElement: (elementIsSingle)?element[dimElementInside]:element.nameInsideElement,
         colorElement: '#426bb0'
-      })
+      }
 
-      // smallMove is used so that no elements are exactly at the same position so that tick() works
-      smallMove++
+      if (elementIsVertical) {
+        dataElement.rowsName = element.rowsName
+        dataElement.columnName = element.columnName
+      }
+
+      else {
+        dataElement.rowName = element.rowName
+        dataElement.columnsName = element.columnsName
+      }
+
+      dataElements.push(dataElement)
     })
 
     // Changes rectangles position so there is no overlapping and each element is on one row or one column
@@ -877,7 +887,39 @@ function createGridChart(data, chartOptions) {
     let elementsAreCircles = (formOfElement === 'circles')
     let elementsAreRectangles = (formOfElement === 'rectangles')
 
-    let collisionForce
+    let elementsToPlaceInColumns
+    // For each column, look for elements
+    columnsName.forEach(column => {
+      elementsToPlaceInColumns = elementsData.filter(el => el.columnName === column)
+      let elementsToPlaceInCell
+      // widthsAlreadyUsed is an array which indexes are the indexes of the rows of the table and which values are
+      // arrays of already used widths for those specific rows
+      let widthsAlreadyUsed = new Array(rowsName.length).fill().map(() => [])
+
+      // For each row in a column check for elements
+      rowsName.forEach((row, indexRow) => {
+        elementsToPlaceInCell = elementsToPlaceInColumns.filter(el => el.rowsName.indexOf(row) !== -1)
+
+        let element1
+        for (let indexEl = 0; indexEl<elementsToPlaceInCell.length; indexEl++) {
+          element1 = elementsToPlaceInCell[indexEl]
+
+          // while width is already used
+          while (widthsAlreadyUsed[indexRow].indexOf(element1.x) !== -1) {
+            element1.x += verticalElementsWidth + marginVerticalElements
+          }
+
+          for (let i=indexRow; i<indexRow + element1.rowsName.length; i++) {
+            // set the width in each cell where element1 is as used widths
+            widthsAlreadyUsed[i].push(element1.x)
+          }
+
+          elementsToPlaceInColumns.splice(elementsToPlaceInColumns.indexOf(element1), 1) // Element has been placed
+        }
+      })
+    })
+
+    /* let collisionForce
     if (elementsAreRectangles) collisionForce = rectCollide().size(rectangle => [rectangle.size[0], rectangle.size[1]])
     if (elementsAreCircles) collisionForce = d3.forceCollide().radius(circle => circle.radius)
 
@@ -887,7 +929,7 @@ function createGridChart(data, chartOptions) {
       .force("collision", collisionForce)
       .stop()
 
-    for (let i = 0; i < 200 ; ++i) simulation.tick()
+    for (let i = 0; i < 200 ; ++i) simulation.tick() */
   }
 
   function rectCollide() {
