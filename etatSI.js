@@ -280,16 +280,14 @@ let dataTest = [
 let chartOptions = {
 }
 
-function getLowerLeftEmptyCell (selectionCellMatrix) {
-
-}
-
 function createGridChart(data, chartOptions) {
   let dimColumn = 'Sous-domaines'
   let dimRow = 'Réseau'
   let dimElementInside = 'SA'
   let rawWidth = 900
-  let rawHeight = 600
+  let rawHeight = 700
+  let columnsColors = ['#c0cff7', '#4170e7', '#00b0f0']
+  let onlySingleElements = true
 
   let divGridGraph = d3.select('body').append('div')
     .attr('class', 'gridGraph')
@@ -305,44 +303,69 @@ function createGridChart(data, chartOptions) {
   let ElementInsideNames = data.map(el => el[dimElementInside]).filter((v, i, a) => a.indexOf(v) === i)
 
   // Separation of vertical, horizontal and single elements
-  let separatedData = createMultiSingleData (data, dimRow, dimColumn, dimElementInside)
+  let verticalElementsData = [], horizontalElementsData = [], singleElementsData = []
+  if (!onlySingleElements) {
+    // If we authorize big horizontal or vertical elements
+    let separatedData = createMultiSingleData (data, dimRow, dimColumn, dimElementInside)
+    verticalElementsData = separatedData[0]
+    horizontalElementsData = separatedData[1]
+    singleElementsData = separatedData[2]
 
-  let verticalElementsData = separatedData[0]
-  let horizontalElementsData = separatedData[1]
-  let singleElementsData = separatedData[2]
+    verticalElementsData.push(...singleElementsData.map(el => {
+      let rowsSingleElement = []
+      rowsSingleElement.push(el[dimRow])
+      return {
+        nameInsideElement: el[dimElementInside],
+        columnName: el[dimColumn],
+        rowsName: rowsSingleElement
+      }
+    }))
 
-  verticalElementsData.push(...singleElementsData.map(el => {
-    let rowsSingleElement = []
-    rowsSingleElement.push(el[dimRow])
-    return {
-      nameInsideElement: el[dimElementInside],
-      columnName: el[dimColumn],
-      rowsName: rowsSingleElement
-    }
-  }))
-  // TODO : dessiner des rectangles pour les single elements et non des cercles
+    console.log('horiz', horizontalElementsData)
+    console.log('vert', verticalElementsData)
+    console.log('single', singleElementsData)
+  }
 
-  console.log('horiz', horizontalElementsData)
-  console.log('vert', verticalElementsData)
-  console.log('single', singleElementsData)
+  else {
+    // if we only want elements to be small and each in one cell
+    horizontalElementsData = data.map(el => {
+      let columnsSingleElement = []
+      columnsSingleElement.push(el[dimColumn])
+      return {
+        nameInsideElement: el[dimElementInside],
+        columnsName: columnsSingleElement,
+        rowName: el[dimRow]
+      }
+    })
+
+    horizontalElementsData = horizontalElementsData.filter((v, i, fullTable) => {
+      let stringifiedObjectsTable = fullTable.map(el => JSON.stringify(el))
+      return stringifiedObjectsTable.indexOf(JSON.stringify(v)) === i
+    })
+
+    console.log('singleElementsData', horizontalElementsData)
+  }
 
   // Calculation of max horizontal elements in the same cell
   let maxHorizontalElements = getMaxHorizontalElements (horizontalElementsData, rowsName, columnsName)
   let maxVerticalElements = getMaxVerticalElements (verticalElementsData, rowsName, columnsName)
   let maxElementInCell = maxVerticalElements * maxHorizontalElements
 
-  // Cell and element width
-  let cellWidth = rawWidth / (columnsName.length + 1)
-  let cellHeight = rawWidth / (rowsName.length + 1)
-  let verticalElementsWidth = cellWidth / (maxVerticalElements + 1)
-  let horizontalElementsHeight = cellHeight / (maxHorizontalElements + 1)
-  let marginVerticalElements = (cellWidth - maxVerticalElements * verticalElementsWidth) / (1 + maxVerticalElements)
-
   console.log('maxHorizElements', maxHorizontalElements)
   console.log('maxVertElements', maxVerticalElements)
 
+  // Cell and element width
+  let marginBetweenColumns = 3
+  let marginBetweenRowsOfFirstColumn = 5
+  let cellWidth = rawWidth / (columnsName.length + 1) - (columnsName.length - 1) * marginBetweenColumns
+  let cellHeight = (rawHeight / (rowsName.length + 1)) 
+  let verticalElementsWidth = cellWidth / (maxVerticalElements + 1)
+  let horizontalElementsHeight = cellHeight / (maxHorizontalElements + 1)
+  let marginXVerticalElements = (cellWidth - maxVerticalElements * verticalElementsWidth) / (1 + maxVerticalElements)
+  let marginYHorizontalElements = (cellHeight - maxHorizontalElements * horizontalElementsHeight) / (maxHorizontalElements + 1)
+
   // Create position data for grid
-  let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, cellWidth, rawHeight / (rowsName.length + 1))
+  let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, cellWidth, cellHeight)
   // Append
   // names of row and columns in data
   gridData[0].forEach((col, indexCol) => col.name = colNamesPlusEmpty[indexCol]) // name columns
@@ -368,9 +391,8 @@ function createGridChart(data, chartOptions) {
   /* Create superimposed svg elements */
   // Drawing of vertical and horizontal elements
   let insideTableSel = d3.select('#insideTable')
-  draw(verticalElementsData, insideTableSel, 'multi', verticalElementsWidth)
-  draw(horizontalElementsData, insideTableSel, 'multi', horizontalElementsHeight)
-  //draw(singleElementsData, insideTableSel, 'single')
+  draw(verticalElementsData, insideTableSel, verticalElementsWidth, 'vertical')
+  draw(horizontalElementsData, insideTableSel, horizontalElementsHeight, 'horizontal')
 
   // function that creates a grid
 // http://www.cagrimmett.com/til/2016/08/17/d3-lets-make-a-grid.html
@@ -394,7 +416,7 @@ function createGridChart(data, chartOptions) {
           height: height
         })
         // increment the x position. i.e. move it over by width (width variable)
-        xpos += width;
+        xpos += width + marginBetweenColumns
       }
       // reset the x position after a row is complete
       xpos = 1;
@@ -461,13 +483,13 @@ function createGridChart(data, chartOptions) {
       .style('fill', '#b4b4b4')
       .style('stroke', "#ffffff")
       .style('stroke-width', '2px')
-      .attr("x", function(d) { return d.x + 5 })
-      .attr("y", function(d) { return d.y + 5})
-      .attr("width", function(d) { return d.width - 10 })
-      .attr("height", function(d) { return d.height - 10 })
+      .attr("x", function(d) { return d.x + marginBetweenRowsOfFirstColumn })
+      .attr("y", function(d) { return d.y + marginBetweenRowsOfFirstColumn})
+      .attr("width", function(d) { return d.width - 2 * marginBetweenRowsOfFirstColumn })
+      .attr("height", function(d) { return d.height - 2 * marginBetweenRowsOfFirstColumn })
 
     d3.selectAll('.columnNameRect')
-      .style('fill', '#8fa9f1')
+      .style('fill', (cell, indexCell) => columnsColors [indexCell % columnsColors.length])
       .style('stroke', "#ffffff")
       .style('stroke-width', '2px')
       .style('stroke-dasharray', rect => {
@@ -475,7 +497,7 @@ function createGridChart(data, chartOptions) {
       })
 
     d3.selectAll('.insideTableRect')
-      .style('fill', '#8fa9f1')
+      .style('fill', (cell, indexCell) => columnsColors [indexCell % columnsColors.length])
       .style('stroke', "#ffffff")
       .style('stroke-width', '2px')
       .style('stroke-dasharray', rect => {
@@ -707,19 +729,16 @@ function createGridChart(data, chartOptions) {
   }
 
   /* Create an array of objects, each one of them contains all the data necessary to define an element visually  */
-  function createElementsPositionData (elementsData, elementDimension) {
+  function createElementsPositionData (elementsData, elementDimension, typeElement) {
     let dataElements = []
     let dataElement = {}
     let elementIsSingle
 
     elementsData.forEach(element => {
       let elementIsVertical = (element.hasOwnProperty('rowsName'))
-      elementIsSingle = (!element.hasOwnProperty('rowsName') && !element.hasOwnProperty('columnsName'))
 
       // Select the cell where the element should have his first extremity
-      let idCellBeginning = (elementIsSingle)?
-        '#rect' + rowsName.indexOf(element[dimRow]) + columnsName.indexOf(element[dimColumn]):
-        (elementIsVertical)?
+      let idCellBeginning = (elementIsVertical)?
           '#rect' + rowsName.indexOf(element.rowsName[0]) + '' + columnsName.indexOf(element.columnName):
           '#rect' + rowsName.indexOf(element.rowName) +  '' + columnsName.indexOf(element.columnsName[0])
 
@@ -728,9 +747,7 @@ function createGridChart(data, chartOptions) {
       let yBeginning = cellBeginning.y
 
       // Select the cell where the element should have his end extremity
-      let idCellEnd = (elementIsSingle)?
-        '#rect' + rowsName.indexOf(element[dimRow]) + columnsName.indexOf(element[dimColumn]):
-        (elementIsVertical)?
+      let idCellEnd = (elementIsVertical)?
           '#rect' + rowsName.indexOf(element.rowsName[element.rowsName.length - 1]) + '' +  columnsName.indexOf(element.columnName):
           '#rect' + rowsName.indexOf(element.rowName) + '' + columnsName.indexOf(element.columnsName[element.columnsName.length - 1])
 
@@ -739,8 +756,6 @@ function createGridChart(data, chartOptions) {
       let yEnd = cellEnd.y
       let cellWidth = cellEnd.width
       let cellHeight = cellEnd.height
-
-      let radiusElement = (elementIsSingle)?22:0
 
       let xCellCenter = xBeginning + cellWidth / 2
       let yCellCenter = yBeginning + cellHeight / 2
@@ -754,12 +769,9 @@ function createGridChart(data, chartOptions) {
         elementDimension
 
       dataElement = {
-        idealX: (elementIsSingle)?xCellCenter:(elementIsVertical)?xBeginning + widthElement + 15:xBeginning + 10,
-        idealY: (elementIsSingle)?yCellCenter:(elementIsVertical)?yBeginning + 10:yBeginning + heightElement + 15,
-        x: (elementIsVertical)?xBeginning + marginVerticalElements:xBeginning + marginVerticalElements,
-        y: (elementIsVertical)?yBeginning + 5:yBeginning + 5,
+        x: (elementIsVertical)?xBeginning + marginXVerticalElements:xBeginning + 10,
+        y: (elementIsVertical)?yBeginning + 5:yBeginning + marginYHorizontalElements,
         size: [widthElement, heightElement],
-        radius: radiusElement,
         nameInsideElement: (elementIsSingle)?element[dimElementInside]:element.nameInsideElement,
         colorElement: '#426bb0'
       }
@@ -778,78 +790,61 @@ function createGridChart(data, chartOptions) {
     })
 
     // Changes rectangles position so there is no overlapping and each element is on one row or one column
-    let formOfElement = (elementIsSingle)?'circles':'rectangles'
-    moveToRightPlace(dataElements, formOfElement)
+    let formOfElement = 'rectangles'
+    if (typeElement === 'vertical') moveToRightPlaceVerticalElements(dataElements, formOfElement)
+    else moveToRightPlaceHorizontalElements(dataElements, formOfElement)
 
     return dataElements
   }
 
   /* Function to draw all elements on the graph
-  * typeOfElement can be 'multi' for big rectangle elements or 'single' for unique cell elements
-   * that will be drawn as circles */
-  function draw(elementsData, insideTableSelection, typeOfElement, elementDimension) {
-    let dataElements = createElementsPositionData(elementsData, elementDimension)
-    let bigElements = (typeOfElement === 'multi')
+  * typeOfElement can be 'vertical' or 'horizontal */
+  function draw(elementsData, insideTableSelection, elementDimension, typeElement) {
+    let dataElements = createElementsPositionData(elementsData, elementDimension, typeElement)
 
     let elementsSpace = insideTableSelection.append('svg')
       .attr('class', 'superimposedElementsSpace')
-
-    let dragCircle = d3.drag()
-      .on("start", dragstarted)
-      .on("drag", circleDragged)
-      .on("end", dragended)
 
     let dragRectangle = d3.drag()
       .on("start", dragstarted)
       .on("drag", rectangleDragged)
       .on("end", dragended)
 
-    dataElements.forEach(dataElement => {
+    dataElements.forEach((dataElement, indexElement) => {
       dataElement.xCenter = dataElement.x + dataElement.size[0] / 2
       dataElement.yCenter = dataElement.y + dataElement.size[1] / 2
 
-      let elementSelection = elementsSpace.selectAll('#' + dataElement.nameInsideElement)
+      let elementSelection = elementsSpace.selectAll('#' + typeElement + 'Element' + indexElement)
         .data([dataElement])
         .enter()
         .append('g')
         .attr('class', 'element')
-        .attr('id', element => element.nameInsideElement)
+        .attr('id', '' + typeElement + 'Element' + indexElement)
 
-      elementSelection.append((bigElements)?'rect':'circle')
-        .attr((bigElements)?'x':'cx', element => element.x)
-        .attr((bigElements)?'y':'cy', element => element.y)
+      elementSelection.append('rect')
+        .attr('x', element => element.x)
+        .attr('y', element => element.y)
         .style('fill', element => element.colorElement)
         .attr('class', element => element.nameInsideElement)
         .style('stroke', '#ffffff')
-        .call((bigElements)?dragRectangle:dragCircle)
+        .call(dragRectangle)
 
       elementSelection.append('text')
         .attr('dy', '.3em')
         .text(element => element.nameInsideElement)
         .attr('text-anchor', 'middle')
 
-      if (bigElements) {
-        elementSelection.select('rect')
-          .attr('width', element => element.size[0])
-          .attr('height', element => element.size[1])
+      elementSelection.select('rect')
+        .attr('width', element => element.size[0])
+        .attr('height', element => element.size[1])
 
-        elementSelection.select('text')
-          .attr('x', element => element.xCenter)
-          .attr('y', element => element.yCenter)
-          .style('fill', '#ffffff')
-          .style('font-family', 'Arial')
-          .style('font-size', '10px')
-          .style('font-weight', 'bold')
-      }
-
-      else {
-        elementSelection.select('circle')
-          .attr('r', element => element.radius)
-
-        elementSelection.select('text')
-          .attr('x', element => element.x )
-          .attr('y', element => element.y )
-      }
+      elementSelection.select('text')
+        .attr('x', element => element.xCenter)
+        .attr('y', element => element.yCenter)
+        .style('fill', '#ffffff')
+        .style('font-family', 'Arial')
+        .style('font-size', '10px')
+        .style('font-weight', 'bold')
     })
   }
 
@@ -883,9 +878,7 @@ function createGridChart(data, chartOptions) {
 
   /* Creates force simulation to avoid overlapping of elements
    * and a force simulation to ensure each element is not out of a row or a column */
-  function moveToRightPlace (elementsData, formOfElement) {
-    let elementsAreCircles = (formOfElement === 'circles')
-    let elementsAreRectangles = (formOfElement === 'rectangles')
+  function moveToRightPlaceVerticalElements (elementsData) {
 
     let elementsToPlaceInColumns
     // For each column, look for elements
@@ -906,7 +899,7 @@ function createGridChart(data, chartOptions) {
 
           // while width is already used
           while (widthsAlreadyUsed[indexRow].indexOf(element1.x) !== -1) {
-            element1.x += verticalElementsWidth + marginVerticalElements
+            element1.x += verticalElementsWidth + marginXVerticalElements
           }
 
           for (let i=indexRow; i<indexRow + element1.rowsName.length; i++) {
@@ -918,169 +911,41 @@ function createGridChart(data, chartOptions) {
         }
       })
     })
-
-    /* let collisionForce
-    if (elementsAreRectangles) collisionForce = rectCollide().size(rectangle => [rectangle.size[0], rectangle.size[1]])
-    if (elementsAreCircles) collisionForce = d3.forceCollide().radius(circle => circle.radius)
-
-    let simulation = d3.forceSimulation(elementsData)
-      .force("x", d3.forceX(function(element) { return element.idealX }))
-      .force("y", d3.forceY(function(element) { return element.idealY }))
-      .force("collision", collisionForce)
-      .stop()
-
-    for (let i = 0; i < 200 ; ++i) simulation.tick() */
   }
 
-  function rectCollide() {
-    let nodes, sizes, masses
-    let size = constant([0, 0])
-    let strength = 1
-    let iterations = 1
+  /* Changes y position of all elements in elementsData to avoid overlapping */
+  function moveToRightPlaceHorizontalElements (elementsData) {
+    let elementsToPlaceInRow
+    // For each row, look for elements
+    rowsName.forEach(row => {
+      elementsToPlaceInRow = elementsData.filter(el => el.rowName === row)
+      let elementsToPlaceInCell
+      // heightsAlreadyUsed is an array which indexes are the indexes of the years of the roadmap and which values are
+      // arrays of already used heights for those years
+      let heightsAlreadyUsed = new Array(columnsName.length).fill().map(() => [])
 
-    function force() {
-      let node, size, mass, xi, yi
-      let i = -1
-      while (++i < iterations) { iterate() }
+      // For each column in a row check for elements
+      columnsName.forEach((column, indexCol) => {
+        elementsToPlaceInCell = elementsToPlaceInRow.filter(el => el.columnsName.indexOf(column) !== -1)
 
-      function iterate() {
-        let j = -1
-        let tree = d3.quadtree(nodes, xCenter, yCenter).visitAfter(prepare)
+        let element1
+        for (let indexEl = 0; indexEl<elementsToPlaceInCell.length; indexEl++) {
+          element1 = elementsToPlaceInCell[indexEl]
 
-        while (++j < nodes.length) {
-          node = nodes[j]
-          size = sizes[j]
-          mass = masses[j]
-          xi = xCenter(node)
-          yi = yCenter(node)
-
-          tree.visit(apply)
-        }
-      }
-
-      function apply(quad, x0, y0, x1, y1) {
-        let data = quad.data
-        let xSize = (size[0] + quad.size[0]) / 2
-        let ySize = (size[1] + quad.size[1]) / 2
-        if (data) {
-          if (data.index <= node.index) { return }
-
-          let x = xi - xCenter(data)
-          let y = yi - yCenter(data)
-          let xd = Math.abs(x) - xSize
-          let yd = Math.abs(y) - ySize
-
-          if (xd < 0 && yd < 0) {
-            let l = Math.sqrt(x * x + y * y)
-            let m = masses[data.index] / (mass + masses[data.index])
-
-            if (Math.abs(xd) < Math.abs(yd)) {
-              node.vx -= (x *= xd / l * strength) * m
-              data.vx += x * (1 - m)
-            } else {
-              node.vy -= (y *= yd / l * strength) * m
-              data.vy += y * (1 - m)
-            }
+          // while height is already used
+          while (heightsAlreadyUsed[indexCol].indexOf(element1.y) !== -1) {
+            element1.y += horizontalElementsHeight + marginYHorizontalElements
           }
-        }
 
-        return x0 > xi + xSize || y0 > yi + ySize ||
-          x1 < xi - xSize || y1 < yi - ySize
-      }
-
-      function prepare(quad) {
-        if (quad.data) {
-          quad.size = sizes[quad.data.index]
-        } else {
-          quad.size = [0, 0]
-          let i = -1
-          while (++i < 4) {
-            if (quad[i] && quad[i].size) {
-              quad.size[0] = Math.max(quad.size[0], quad[i].size[0])
-              quad.size[1] = Math.max(quad.size[1], quad[i].size[1])
-            }
+          for (let i=indexCol; i<indexCol + element1.columnsName.length; i++) {
+            // set the heights in each cell where element1 is as used heights
+            heightsAlreadyUsed[i].push(element1.y)
           }
+
+          elementsToPlaceInRow.splice(elementsToPlaceInRow.indexOf(element1), 1) // Element has been placed
         }
-      }
-    }
-
-    function xCenter(d) { return d.x + d.vx + sizes[d.index][0] / 2 }
-    function yCenter(d) { return d.y + d.vy + sizes[d.index][1] / 2 }
-
-    force.initialize = function (_) {
-      sizes = (nodes = _).map(size)
-      masses = sizes.map(function (d) { return d[0] * d[1] })
-    }
-
-    force.size = function (_) {
-      return (arguments.length
-        ? (size = typeof _ === 'function' ? _ : constant(_), force)
-        : size)
-    }
-
-    force.strength = function (_) {
-      return (arguments.length ? (strength = +_, force) : strength)
-    }
-
-    force.iterations = function (_) {
-      return (arguments.length ? (iterations = +_, force) : iterations)
-    }
-
-    return force
-  }
-
-  function boundedBox() {
-    let nodes, sizes
-    let bounds
-    let size = constant([0, 0])
-
-    function force() {
-      let node, size
-      let xi, x0, x1, yi, y0, y1
-      let i = -1
-      while (++i < nodes.length) {
-        node = nodes[i]
-        size = sizes[i]
-        xi = node.x + node.vx
-        x0 = bounds[0][0] - xi
-        x1 = bounds[1][0] - (xi + size[0])
-        yi = node.y + node.vy
-        y0 = bounds[0][1] - yi
-        y1 = bounds[1][1] - (yi + size[1])
-        if (x0 > 0 || x1 < 0) {
-          node.x += node.vx
-          node.vx = -node.vx
-          if (node.vx < x0) { node.x += x0 - node.vx }
-          if (node.vx > x1) { node.x += x1 - node.vx }
-        }
-        if (y0 > 0 || y1 < 0) {
-          node.y += node.vy
-          node.vy = -node.vy
-          if (node.vy < y0) { node.vy += y0 - node.vy }
-          if (node.vy > y1) { node.vy += y1 - node.vy }
-        }
-      }
-    }
-
-    force.initialize = function (_) {
-      sizes = (nodes = _).map(size)
-    }
-
-    force.bounds = function (_) {
-      return (arguments.length ? (bounds = _, force) : bounds)
-    }
-
-    force.size = function (_) {
-      return (arguments.length
-        ? (size = typeof _ === 'function' ? _ : constant(_), force)
-        : size)
-    }
-
-    return force
-  }
-
-  function constant(_) {
-    return function () { return _ }
+      })
+    })
   }
 
   function getSelectionCellData (idCell) {
