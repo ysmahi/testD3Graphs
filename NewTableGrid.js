@@ -1,247 +1,247 @@
 let dataTest = [
   {
-    "AppName": "App1",
+    "codeSA": "codeSA1",
     "Branch": "Finance",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App1",
+    "codeSA": "codeSA1",
     "Branch": "Finance",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App1",
+    "codeSA": "codeSA1",
     "Branch": "Finance",
     "CompanyBrand": "Brand3"
   },
 
   {
-    "AppName": "App78",
+    "codeSA": "codeSA78",
     "Branch": "Finance",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App78",
+    "codeSA": "codeSA78",
     "Branch": "Finance",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App1",
+    "codeSA": "codeSA1",
     "Branch": "Tech",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App2",
+    "codeSA": "codeSA2",
     "Branch": "Finance",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App2",
+    "codeSA": "codeSA2",
     "Branch": "Finance",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App2",
+    "codeSA": "codeSA2",
     "Branch": "Finance",
     "CompanyBrand": "Brand4"
   },
   {
-    "AppName": "App2",
+    "codeSA": "codeSA2",
     "Branch": "Finance",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App6",
+    "codeSA": "codeSA6",
     "Branch": "Tech",
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App30",
+    "codeSA": "codeSA30",
     "Branch": "Tech",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App3",
+    "codeSA": "codeSA3",
     "Branch": "Tech",
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App30",
+    "codeSA": "codeSA30",
     "Branch": "Tech",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App30",
+    "codeSA": "codeSA30",
     "Branch": "Tech",
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App30",
+    "codeSA": "codeSA30",
     "Branch": "Tech",
     "CompanyBrand": "Brand4"
   },
   {
-    "AppName": "App3",
+    "codeSA": "codeSA3",
     "Branch": "HR",
     "CompanyBrand": "Brand3"
   },  {
-    "AppName": "App3",
+    "codeSA": "codeSA3",
     "Branch": "Sales",
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App4",
+    "codeSA": "codeSA4",
     "Branch": "Sales",
     "CompanyBrand": "Brand4"
   },
   {
-    "AppName": "App4",
+    "codeSA": "codeSA4",
     "Branch": "Sales",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App62",
+    "codeSA": "codeSA62",
     "Branch": "Sales",
     "CompanyBrand": "Brand4"
   },
   {
-    "AppName": "App62",
+    "codeSA": "codeSA62",
     "Branch": "Sales",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App112",
+    "codeSA": "codeSA112",
     "Branch": "Sales",
     "CompanyBrand": "Brand4"
   },
   {
-    "AppName": "App112",
+    "codeSA": "codeSA112",
     "Branch": "Sales",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App5",
+    "codeSA": "codeSA5",
     "Branch": "Finance",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App6",
+    "codeSA": "codeSA6",
     "Branch": "HR",
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App7",
+    "codeSA": "codeSA7",
     "Branch": "Tech",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App8",
+    "codeSA": "codeSA8",
     "Branch": "Sales",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App8",
+    "codeSA": "codeSA8",
     "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App9",
+    "codeSA": "codeSA9",
     "Branch": "Finance",
     "CompanyBrand": "Brand3"
   },
   {
-    "AppName": "App10",
+    "codeSA": "codeSA10",
     "Branch": "HR",
     "CompanyBrand": "Brand4"
   },
   {
-    "AppName": "App10",
+    "codeSA": "codeSA10",
     "Branch": "HR",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App10",
+    "codeSA": "codeSA10",
     "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App10",
+    "codeSA": "codeSA10",
     "Branch": "HR",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App10",
+    "codeSA": "codeSA10",
     "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App10",
+    "codeSA": "codeSA10",
     "Branch": "HR",
     "CompanyBrand": "Brand6"
   },
   {
-    "AppName": "App10b",
+    "codeSA": "codeSA10b",
     "Branch": "HR",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App10b",
+    "codeSA": "codeSA10b",
     "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App11",
+    "codeSA": "codeSA11",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App42",
+    "codeSA": "codeSA42",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
   },  {
-    "AppName": "App43",
+    "codeSA": "codeSA43",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
   },  {
-    "AppName": "App44",
+    "codeSA": "codeSA44",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
   },  {
-    "AppName": "App45",
+    "codeSA": "codeSA45",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
   },{
-    "AppName": "App47",
+    "codeSA": "codeSA47",
     "Branch": "Tech",
     "CompanyBrand": "Brand5"
   },
   {
-    "AppName": "App12",
+    "codeSA": "codeSA12",
     "Branch": "Sales",
     "CompanyBrand": "Brand6"
   },
   {
-    "AppName": "App13",
+    "codeSA": "codeSA13",
     "Branch": "Finance",
     "CompanyBrand": "Brand1"
   },
   {
-    "AppName": "App14",
+    "codeSA": "codeSA14",
     "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App15",
+    "codeSA": "codeSA15",
     "Branch": "HR",
     "CompanyBrand": "Brand2"
   },
   {
-    "AppName": "App16",
+    "codeSA": "codeSA16",
     "Branch": "HR",
     "CompanyBrand": "Brand6"
   },
   {
-    "AppName": "App16",
+    "codeSA": "codeSA16",
     "Branch": "Finance",
     "CompanyBrand": "Brand6"
   }
@@ -257,7 +257,7 @@ function getLowerLeftEmptyCell (selectionCellMatrix) {
 function createGridChart(data, chartOptions) {
   let dimColumn = 'Branch'
   let dimRow = 'CompanyBrand'
-  let dimElementInside = 'AppName'
+  let dimElementInside = 'codeSA'
   let rawWidth = 900
   let rawHeight = 1000
 
@@ -287,7 +287,8 @@ function createGridChart(data, chartOptions) {
 
   // Create position data for grid
   let gridData = createGridData(rowsName.length + 1, columnsName.length + 1, rawWidth / (columnsName.length + 1), rawHeight / (rowsName.length + 1))
-  // Append names of row and columns in data
+  // Append
+  // names of row and columns in data
   gridData[0].forEach((col, indexCol) => col.name = colNamesPlusEmpty[indexCol]) // name columns
   for(let i=1; i<gridData.length; i++) { // name rows
     let currentRow = gridData[i]
@@ -389,12 +390,12 @@ function createGridChart(data, chartOptions) {
 
   /* Create superimposed svg elements */
   // Calculation of max horizontal elements in the same cell
-  let maxCellHeight = getMaxCellHeight (horizontalElementsData, rowsName, columnsName)
-  let maxCellWidth = getMaxCellWidth (verticalElementsData, rowsName, columnsName)
-  let maxElementInCell = maxCellWidth * maxCellHeight
+  let maxHorizontalElements = getMaxHorizontalElements (horizontalElementsData, rowsName, columnsName)
+  let maxVerticalElements = getMaxVerticalElements (verticalElementsData, rowsName, columnsName)
+  let maxElementInCell = maxVerticalElements * maxHorizontalElements
 
-  console.log('maxCellWidth', maxCellWidth)
-  console.log('maxVertElements', maxCellHeight)
+  console.log('maxHorizElements', maxHorizontalElements)
+  console.log('maxVertElements', maxVerticalElements)
 
   // Drawing of vertical elements and creating
   draw(verticalElementsData, 'multi')
@@ -434,7 +435,7 @@ function createGridChart(data, chartOptions) {
   }
 
   /* Calculate cell height depending on the maximum number of horizontal elements in a cell */
-  function getMaxCellHeight (horizontalElementsData, rowsName, columnsName) {
+  function getMaxHorizontalElements (horizontalElementsData, rowsName, columnsName) {
       let matrixHorizEl = new Array(rowsName.length).fill().map(() => {
       return new Array(columnsName.length)
         .fill()
@@ -447,11 +448,11 @@ function createGridChart(data, chartOptions) {
       })
     })
 
-    return Math.max(...matrixHorizEl.map(el => Math.max(...el))) + 1
+    return Math.max(...matrixHorizEl.map(el => Math.max(...el)))
   }
 
   /* Calculate cell width depending on the maximum number of vertical elements in a cell */
-  function getMaxCellWidth (verticalElementsData, rowsaName, columnsName) {
+  function getMaxVerticalElements (verticalElementsData, rowsaName, columnsName) {
     let matrixVertEl = new Array(rowsName.length).fill().map(() => {
       return new Array(columnsName.length)
         .fill()
@@ -464,12 +465,12 @@ function createGridChart(data, chartOptions) {
       })
     })
 
-    return Math.max(...matrixVertEl.map(el => Math.max(...el))) + 1
+    return Math.max(...matrixVertEl.map(el => Math.max(...el)))
   }
 
   /* Returns an array of elements data [dataVerticalElements, dataHorizontalElements, dataSingleElements]
   * dataElements : array of objects defining the position of elements
-   * Ex : [{"AppName": "App1", "Branch": "Finance", "CompanyBrand": "Brand1" }]
+   * Ex : [{"codeSA": "codeSA1", "Branch": "Finance", "CompanyBrand": "Brand1" }]
    * with "Branch" being the column's name and "CompanyBrand" the row's one */
   function createMultiSingleData (dataElements, nameDimRow, nameDimColumn, nameDimElementInside) {
     // Create array of elements that are in multiple cell or column
