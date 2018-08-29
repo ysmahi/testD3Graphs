@@ -281,13 +281,13 @@ let chartOptions = {
 }
 
 function createGridChart(data, chartOptions) {
-  let dimColumn = 'Sous-domaines'
+  let dimColumn = 'Capacités'
   let dimRow = 'Réseau'
   let dimElementInside = 'SA'
   let rawWidth = 900
   let rawHeight = 700
   let columnsColors = ['#c0cff7', '#4170e7', '#00b0f0']
-  let onlySingleElements = true
+  let directionElements = 'Horizontalement et verticalement'
 
   let divGridGraph = d3.select('body').append('div')
     .attr('class', 'gridGraph')
@@ -304,22 +304,14 @@ function createGridChart(data, chartOptions) {
 
   // Separation of vertical, horizontal and single elements
   let verticalElementsData = [], horizontalElementsData = [], singleElementsData = []
-  if (!onlySingleElements) {
+  if (!(directionElements === 'Eléments courts')) {
     // If we authorize big horizontal or vertical elements
     let separatedData = createMultiSingleData (data, dimRow, dimColumn, dimElementInside)
     verticalElementsData = separatedData[0]
     horizontalElementsData = separatedData[1]
     singleElementsData = separatedData[2]
 
-    verticalElementsData.push(...singleElementsData.map(el => {
-      let rowsSingleElement = []
-      rowsSingleElement.push(el[dimRow])
-      return {
-        nameInsideElement: el[dimElementInside],
-        columnName: el[dimColumn],
-        rowsName: rowsSingleElement
-      }
-    }))
+    reorganizeElementsDependingOnDirection (horizontalElementsData, verticalElementsData, singleElementsData, directionElements)
 
     console.log('horiz', horizontalElementsData)
     console.log('vert', verticalElementsData)
@@ -479,7 +471,7 @@ function createGridChart(data, chartOptions) {
       .attr("height", function(d) { return d.height; })
 
     // Adjust style of table
-    d3.selectAll('.rowNameRect')
+    let cellsFirstRowSelection = d3.selectAll('.rowNameRect')
       .style('fill', '#b4b4b4')
       .style('stroke', "#ffffff")
       .style('stroke-width', '2px')
@@ -511,7 +503,11 @@ function createGridChart(data, chartOptions) {
     // Append name of rows and columns
     cell.append('text')
       .attr('x', cell => cell.x + cell.width/2)
-      .attr('y', cell => cell.y + cell.height/2)
+      .attr('y', (cell, indexCell) => {
+        let cellIsInFirstRow = (indexCell !== 0 && cell.hasOwnProperty('name'))
+        if (cellIsInFirstRow) return cell.y + 10
+        else return cell.y + cell.height/2
+      })
       .attr("dy", ".35em")
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'central')
@@ -524,6 +520,31 @@ function createGridChart(data, chartOptions) {
       .style('fill', '#ffffff')
       .style('font-size', '13px')
       .style('font-family', 'Arial')
+      .call(wrap, cellWidth)
+  }
+
+  /* Function to make all elements horizontal or all elements vertical depending on the wanted direction */
+  function reorganizeElementsDependingOnDirection (horizontalElements, verticalElements, singleElements, directionElements) {
+    verticalElements.push(...singleElements.map(el => {
+      let rowsSingleElement = []
+      rowsSingleElement.push(el[dimRow])
+      return {
+        nameInsideElement: el[dimElementInside],
+        columnName: el[dimColumn],
+        rowsName: rowsSingleElement
+      }
+    }))
+
+    switch (directionElements) {
+      case 'Horizontalement et verticalement':
+        break
+      case 'Horizontalement':
+        break
+      case 'Verticalement:':
+        break
+      default:
+        console.log('Wrong direction')
+    }
   }
 
   /* Calculate cell height depending on the maximum number of horizontal elements in a cell */
@@ -950,6 +971,31 @@ function createGridChart(data, chartOptions) {
 
   function getSelectionCellData (idCell) {
     return d3.selectAll('#grid').select(idCell).datum()
+  }
+
+  function wrap(text, width) {
+    text.each(function() {
+      var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        x = text.attr('x')
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+      while (word = words.pop()) {
+        line.push(word);
+        tspan.text(line.join(" "));
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        }
+      }
+    });
   }
 }
 
